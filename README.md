@@ -7,7 +7,7 @@
 - **En el archivo Git.md** les dejé una descripción de los pasos a realizar para descargar el repositorio y poder contribuir usando git.
 
 ## Consigna
-El simulador deberá brindarla posibilidad de cargar procesos por parte del usuario. Para facilitar la implementación se permitirán como máximo 10 procesos y la asignación de memoria se realizará con particiones fijas. El esquema de particiones será el siguiente:
+El simulador deberá brindar la posibilidad de cargar procesos por parte del usuario. Para facilitar la implementación se permitirán como máximo 10 procesos y la asignación de memoria se realizará con particiones fijas. El esquema de particiones será el siguiente:
 - 100K destinados al Sistema Operativo.
 - 250K para trabajos los más grandes.
 - 120K para trabajos medianos.
