@@ -24,7 +24,7 @@ multiprogramación en 5** ).
     - Tiempo de irrupción.
 - La planificación de CPU será dirigida por un algoritmo Round-Robin con q=2.
 - Las presentaciones de salida deberán realizarse cada vez que llega un nuevo proceso y cuando se termina un proceso en ejecución.
-- No se permiten corridas ininterrumpidas de simulador, desde que se inicia la simulación hasta que termina el último proceso.
+- No se permiten corridas ininterrumpidas de simulador, desde que se inicia la simulación hasta que termina el último proceso. (Quiere que el usuario controle el avance del programa, presionando enter o cualquier otro método).
 
 ### El simulador deberá presentar como salida la siguiente información:
 - El estado del procesador (proceso que se encuentra corriendo en ese instante)
