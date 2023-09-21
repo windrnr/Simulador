@@ -8,9 +8,10 @@ int main(int argc, char **argv) {
         }
 
         if (*argv[1] == '\0') {
-                fprintf(stderr, "Un path no ha sido provisto\n");
+                fprintf(stderr, "Una dirección no ha sido provista\n");
                 exit(EXIT_FAILURE);
         }
+
         Parse_csv(argv[1], 1);
         return 0;
 }
