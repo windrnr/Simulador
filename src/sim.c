@@ -1,6 +1,19 @@
-#include <stdio.h>
+#define SIMU_IMPLEMENTATION
+#include "simu.h"
 
-int main(void) {
-        printf("Hola!");
+int main(int argc, char **argv) {
+        if (argc != 2) {
+                fprintf(stderr, "El uso es '%s' <path>.\n", argv[0]);
+                exit(EXIT_FAILURE);
+        }
+
+        if (*argv[1] == '\0') {
+                fprintf(stderr, "Un path no ha sido provisto\n");
+                exit(EXIT_FAILURE);
+        }
+        Parse_csv(argv[1], 1);
         return 0;
 }
+
+
+
