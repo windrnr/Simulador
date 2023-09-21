@@ -14,7 +14,7 @@ El simulador deberá brindar la posibilidad de cargar procesos por parte del usu
 - 60K para trabajos pequeños.
 
 ## Funcionamiento
-- El programa debe permitir ingreso de nuevos procesos cuando sea posible ( **manteniendo en grado de
+- El programa debe permitir ingreso de nuevos procesos cuando sea posible ( **manteniendo el grado de
 multiprogramación en 5** ). 
 - La política de asignación de memoria será Best-Fit.
 - Por cada proceso se debe ingresar o leer desde un archivo:
