@@ -1,5 +1,5 @@
-#ifndef SIMU_H_
-#define SIMU_H_
+#ifndef SIMLIB_H_
+#define SIMLIB_H_
 #define COLOR_BOLD "\033[1m"
 #define COLOR_OFF "\033[m"
 #define COLOR_RED 31
@@ -10,15 +10,21 @@
 
 void Parse_csv(const char *filepath, int column_num);
 
-#endif // SIMU_H_
+#endif // SIMLIB_H_
 
-#ifdef SIMU_IMPLEMENTATION
+#ifdef SIMLIB_IMPLEMENTATION
 
 char* get_campo(char* line, int num){
         char* token; 
-        for(token = strtok(line, ";"); token && *token; token = strtok(NULL, ";\n")){
+        for(token = strtok(line, ";"); /*CONDICIONAL VACÍO*/ ; token = strtok(NULL, ";\n")){
+                if (token == NULL)
+                    return NULL;
+
+                if (*token == '\0')
+                    return NULL;
+
                 if (num == 1)
-                        return token;
+                    return token;
 
                 num -= 1;
         }
@@ -46,7 +52,6 @@ void Parse_csv(const char *filepath, int column_num) {
                 printf("El campo %d es: %s\n", column_num, get_campo(line_ptr, column_num));
                 free(line_ptr);
         }
-
 }
 
-#endif // SIMU_IMPLEMENTATION
+#endif // SIMLIB_IMPLEMENTATION

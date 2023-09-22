@@ -1,5 +1,5 @@
-#define SIMU_IMPLEMENTATION
-#include "simu.h"
+#define SIMLIB_IMPLEMENTATION
+#include "simlib.h"
 
 int main(int argc, char **argv) {
         if (argc != 2) {
@@ -12,7 +12,7 @@ int main(int argc, char **argv) {
                 exit(EXIT_FAILURE);
         }
 
-        Parse_csv(argv[1], 1);
+        Parse_csv(argv[1], 2);
         return 0;
 }
 
