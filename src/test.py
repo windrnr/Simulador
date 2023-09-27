@@ -3,7 +3,7 @@ from pathlib import Path
 import csv
 from tabulate import tabulate
 
-def readCSV(file_path):
+def readCSV(file_path: Path) -> list[str]:
     data = []
     if not Path.exists(file_path):
         raise ValueError(f"A ocurrido un error abriendo '{file_path}'.")
@@ -16,7 +16,7 @@ def readCSV(file_path):
     return data
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("file_path", type=Path, help="La dirección al archivo .csv.")
     args = parser.parse_args()
