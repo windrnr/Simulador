@@ -1,4 +1,4 @@
 build/test.dist
 build/test.onefile-build
 build/test.build
-src/.CVersion
+src/CVersion
