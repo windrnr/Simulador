@@ -18,8 +18,11 @@ def readCSV(file_path: Path) -> list[str]:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("file_path", type=Path, help="La dirección al archivo .csv.")
+    parser.add_argument("file_path", type=Path, help="Dirección del archivo con los procesos.")
     args = parser.parse_args()
+
+    if not (args.file_path.suffix == '.csv'):
+        parser.error("El archivo debe ser de extensión '.csv'.")
     
     headers = ["PDI", "TAM(KB)", "TA", "TI"]
     try:
