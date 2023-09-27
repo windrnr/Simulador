@@ -5,6 +5,7 @@
 - Libro de William Stallings: https://shorturl.at/mJLU6
 - Libro de Tanenbaum: https://shorturl.at/jzQZ8
 - **En el archivo Git.md** les dejé una descripción de los pasos a realizar para descargar el repositorio y poder contribuir usando git.
+- Compilador de Python: https://github.com/Nuitka/Nuitka
 
 ## Consigna
 El simulador deberá brindar la posibilidad de cargar procesos por parte del usuario. Para facilitar la implementación se permitirán como máximo 10 procesos y la asignación de memoria se realizará con particiones fijas. El esquema de particiones será el siguiente:
