@@ -11,9 +11,8 @@ class Reader:
             raise ValueError(f"Ha ocurrido un error abriendo '{file_path}'. El archivo no existe o no es encontrado.")
 
         data = {}
-        suffix = file_path.suffix
 
-        match suffix:
+        match file_path.suffix:
             case '.csv':
                 data = self.csv_reader(file_path)
             case '.json':
