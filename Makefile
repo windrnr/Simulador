@@ -1,9 +1,9 @@
 default: run
 run:
-	python3 ./src/test.py ./src/test.csv
+	python3 ./src/main.py ./src/test.csv
 
 compile:
-	nuitka3 --standalone --onefile -o Simulador --output-dir=./build ./src/test.py
+	nuitka3 --standalone --onefile -o Simulador --output-dir=./build ./src/main.py
 
 .PHONY: clean
 clean:

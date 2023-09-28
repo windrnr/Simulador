@@ -1,4 +1,5 @@
-build/test.dist
-build/test.onefile-build
-build/test.build
-src/CVersion
+build/main.dist
+build/main.onefile-build
+build/main.build
+src/.CVersion
+__pycache__
