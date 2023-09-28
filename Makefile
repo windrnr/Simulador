@@ -1,10 +1,12 @@
-default: run
+init: 
+	pip install -r requirements.txt
+
 run:
-	python3 ./src/main.py ./src/test.csv
+	python3 ./sim_mod/main.py ./test/test.csv
 
 compile:
-	nuitka3 --standalone --onefile -o Simulador --output-dir=./build ./src/main.py
+	nuitka3 --standalone --onefile -o Simulador --output-dir=./build ./sim_mod/main.py
 
-.PHONY: clean
+.PHONY: clean init test
 clean:
 	rm -r ./build/*

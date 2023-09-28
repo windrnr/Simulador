@@ -1,8 +1,8 @@
 import argparse
 from tabulate import tabulate
 from pathlib import Path
-from sim_lib import Reader
-from sim_lib.Process import Process
+import Reader
+from Process import Process
 
 
 # Esto probablemente lo moveremos a un módulo que se encarge de la ejecución del simulador. Por el momento está acá
