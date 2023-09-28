@@ -7,19 +7,19 @@ class Reader:
         pass
     
     def read(self, file_path: Path) -> dict:
-        suffix = file_path.suffix
         if not Path.exists(file_path):
             raise ValueError(f"Ha ocurrido un error abriendo '{file_path}'. El archivo no existe o no es encontrado.")
 
-        if not ((suffix == ".csv") or (suffix == ".json")):
-            raise ValueError(f"El archivo de entrada debe ser de extensión '.csv' o '.json'.")
-        
         data = {}
-        if suffix == ".csv":
-            data = self.csv_reader(file_path)
-        
-        if suffix == ".json":
-            data = self.json_reader(file_path)
+        suffix = file_path.suffix
+
+        match suffix:
+            case '.csv':
+                data = self.csv_reader(file_path)
+            case '.json':
+                data = self.json_reader(file_path)
+            case _:
+                raise ValueError(f"El archivo de entrada debe ser de extensión '.csv' o '.json'.")
 
         return data
         
