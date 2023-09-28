@@ -1,9 +1,8 @@
 import argparse
 from tabulate import tabulate
 from pathlib import Path
-import Reader
-from Process import Process
-
+import reader
+from process import Process
 
 # Esto probablemente lo moveremos a un módulo que se encarge de la ejecución del simulador. Por el momento está acá
 def build_process_list(data: list[list[str]]) -> list[Process]:
@@ -26,34 +25,35 @@ def print_table_dict(data:dict[str, str]) -> None:
     print(tabulate(data, headers="firstrow", tablefmt="grid"))
 
 
-# La idea es que main se encarge de manejar los errores que van ocurriendo, y llamar a los procesos principales del simulador, no tendría que haber una implementación en este archivo.
-# Hay varias cosas que no deberían estár, pero por el momento las dejo acá porque no tenemos tanto desarrollado.
-def main() -> None:
+def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "file_path", type=Path, help="Dirección del archivo con los procesos."
-    )
+            "file_path", type=Path, help="Dirección del archivo con los procesos."
+            )
     args = parser.parse_args()
 
-    if not (args.file_path.suffix == ".csv"):
-        parser.error("El archivo debe ser de extensión '.csv'.")
+    return args
+
+
+# La idea es que main se encarge de manejar los errores que van ocurriendo, y llamar a los procesos principales del simulador, no tendría que haber una implementación en esta función .
+# Hay varias cosas que no deberían estár, pero por el momento las dejo acá porque no tenemos tanto desarrollado.
+def main() -> None:
+    args = parse_args()
 
     try:
-        data = Reader.csv_reader(args.file_path)
+        r = reader.Reader()
+        data = r.read(args.file_path)
         print("La información en la tabla:")
         print_table(data)
+        process_list = build_process_list(data)
+        # Esto siguiente, repito, es una demostración de que los valores efectivamente se cargaron en la clase. No tiene otro uso.
+        print("La información en la clase:\n =======================")
+        for process in process_list:
+            process.print_own_data()
+            print("=======================")
+
     except ValueError as e:
         print(f"Error: {e}")
-        parser.error("El archivo no existe o no es encontrado.")
-
-
-    process_list = build_process_list(data)
-    # Esto siguiente, repito, es una demostración de que los valores efectivamente se cargaron en la clase. No tiene otro uso.
-    print("La información en la clase:\n =======================")
-    for process in process_list:
-        process.print_own_data()
-        print("=======================")
-
 
 if __name__ == "__main__":
     main()
