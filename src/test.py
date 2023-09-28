@@ -30,7 +30,6 @@ def read_csv_dictionary(file_path: Path) -> dict[str, int]:
 
     return data
 
-
 def print_table(data:list[str]) -> None:
     headers = ["PDI", "TAM(KB)", "TA", "TI"]
     print(tabulate(data, headers, tablefmt="grid"))
@@ -52,7 +51,5 @@ def main() -> None:
     except ValueError as e:
         print(f"Error: {e}")
         parser.error("El archivo no existe o no es encontrado.")
-
-
 if __name__ == "__main__":
     main()
