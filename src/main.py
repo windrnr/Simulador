@@ -40,15 +40,19 @@ def main() -> None:
 
     try:
         data = Reader.csv_reader(args.file_path)
-        # print_table(data)
+        print("La información en la tabla:")
+        print_table(data)
     except ValueError as e:
         print(f"Error: {e}")
         parser.error("El archivo no existe o no es encontrado.")
 
 
     process_list = build_process_list(data)
+    # Esto siguiente, repito, es una demostración de que los valores efectivamente se cargaron en la clase. No tiene otro uso.
+    print("La información en la clase:\n =======================")
     for process in process_list:
         process.print_own_data()
+        print("=======================")
 
 
 if __name__ == "__main__":
