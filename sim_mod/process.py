@@ -1,16 +1,15 @@
 class Process:
     def __init__(self, data: list[str]):
-        self.PID    = data[0]
-        self.SIZE   = data[1]
-        self.TA     = data[2]
-        self.TI     = data[3]
+        self._PID    = data[0]
+        self._SIZE   = data[1]
+        self._TA     = data[2]
+        self._TI     = data[3]
 
     def return_list_of_data(self) -> list:
         data = []
-        data.append(self.PID)
-        data.append(self.SIZE)
-        data.append(self.TA)
-        data.append(self.TI)
+        data.append(self._PID)
+        data.append(self._SIZE)
+        data.append(self._TA)
+        data.append(self._TI)
 
         return data
-
