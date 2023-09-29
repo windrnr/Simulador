@@ -22,11 +22,10 @@ def parse_args() -> argparse.Namespace:
 
     return args
 
-def print_table(process_list: list[Process]) -> None:
+def print_table(data: list, headers: list) -> None:
     outer = []
-    for process in process_list:
+    for process in data:
         outer.append(process.return_list_of_data())
-    headers = ["PDI", "TAM(KB)", "TA", "TI"]
     print(tabulate(outer, headers, tablefmt="grid"))
 
 # La idea es que main se encarge de manejar los errores que van ocurriendo, y llamar a los procesos principales del simulador
@@ -38,7 +37,7 @@ def main() -> None:
         r = reader.Reader()
         data = r.read(args.file_path)
         process_list = build_process_list(data)
-        print_table(process_list)
+        print_table(process_list, ["PDI", "TAM(KB)", "TA", "TI"])
     except ValueError as e:
         print(f"Error: Extensión incorrecta. {e}")
     except FileNotFoundError as e:
