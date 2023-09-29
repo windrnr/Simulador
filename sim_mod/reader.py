@@ -8,7 +8,10 @@ class Reader:
     
     def read(self, file_path: Path) -> dict:
         if not Path.exists(file_path):
-            raise ValueError(f"Ha ocurrido un error abriendo '{file_path}'. El archivo no existe o no es encontrado.")
+            raise FileNotFoundError(f"Ha ocurrido un error abriendo '{file_path}'.") 
+
+        if Path.is_dir(file_path):
+            raise IsADirectoryError(f"'{file_path}' es un directorio.")
 
         match file_path.suffix:
             case '.csv':
@@ -16,7 +19,7 @@ class Reader:
             case '.json':
                 data = self._json_reader(file_path)
             case _:
-                raise ValueError(f"El archivo de entrada debe ser de extensión '.csv' o '.json'.")
+                raise ValueError(f"El archivo de entrada debe ser '.csv' o '.json'.")
 
         return data
         
