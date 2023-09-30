@@ -16,3 +16,6 @@ class Process:
 
     def get_ta(self) -> int:
         return self._TA
+
+    def get_size(self) -> int:
+        return self._SIZE

@@ -12,7 +12,9 @@ def build_process_list(data: dict) -> list[Process]:
         item = Process(p)
         process_list.append(item)
 
+    process_list = [x for x in process_list if x.get_size() <= 250]
     process_list.sort(reverse = False, key = lambda x: x.get_ta())
+
     return process_list
 
 def parse_args() -> argparse.Namespace:
@@ -38,8 +40,10 @@ def main() -> None:
     try:
         r = reader.Reader()
         data = r.read(args.file_path)
-        process_list = build_process_list(data)
-        print_table(process_list, ["PDI", "TAM(KB)", "TA", "TI"])
+        
+        new_process_list = build_process_list(data)
+        print_table(new_process_list, ["PID", "TAM(KB)", "TA", "TI"])
+
     except ValueError as e:
         print(f"Error: Extensión incorrecta. {e}")
     except FileNotFoundError as e:
