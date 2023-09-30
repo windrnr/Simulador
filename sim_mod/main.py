@@ -7,10 +7,12 @@ from process import Process
 # A estas funciones probablemente las moveremos a un módulo que se encarge de la ejecución del simulador. Por el momento está acá.
 def build_process_list(data: dict) -> list[Process]:
     process_list = []
+
     for p in data.values():
         item = Process(p)
         process_list.append(item)
-    
+
+    process_list.sort(key = lambda x: x.get_ta())
     return process_list
 
 def parse_args() -> argparse.Namespace:
