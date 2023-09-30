@@ -12,7 +12,7 @@ def build_process_list(data: dict) -> list[Process]:
         item = Process(p)
         process_list.append(item)
 
-    process_list = [x for x in process_list if x.get_size() <= 250]
+    process_list = [p for p in process_list if p.get_size() <= 250]
     process_list.sort(reverse = False, key = lambda x: x.get_ta())
 
     return process_list
@@ -30,7 +30,7 @@ def print_table(data: list, headers: list) -> None:
     outer = []
     for process in data:
         outer.append(process.return_list_of_data())
-    print(tabulate(outer, headers, tablefmt="grid"))
+    print(tabulate(outer, headers, tablefmt="fancy_outline", stralign='center'))
 
 # La idea es que main se encarge de manejar los errores que van ocurriendo, y llamar a los procesos principales del simulador
 # No tendría que haber una implementación en esta función.
