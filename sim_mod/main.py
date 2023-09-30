@@ -12,7 +12,7 @@ def build_process_list(data: dict) -> list[Process]:
         item = Process(p)
         process_list.append(item)
 
-    process_list.sort(key = lambda x: x.get_ta())
+    process_list.sort(reverse = False, key = lambda x: x.get_ta())
     return process_list
 
 def parse_args() -> argparse.Namespace:
