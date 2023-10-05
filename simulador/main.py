@@ -1,32 +1,34 @@
 import argparse
 import reader
-from sim import build_process_list, print_table
+from sim import print_table, QueueNew, QueueReady
 from pathlib import Path
-
-def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-            "file_path", type=Path, help="Dirección del archivo con los procesos."
-            )
-    args = parser.parse_args()
-
-    return args
 
 # Responsabilidades de main:
 # 1) Encargarse solamente de manejar los errores que vayan subiendo del resto de la ejecución del programa.
 # 2) Llamar a los procesos principales del simulador (Que se encuentran en sim.py)
 
 #TODO:
-# 1. Abstraer la lectura y construcción de la cola de nuevos en una función.
+# 1. Abstraer toda la implementación del simulador fuera de main.py
 def main() -> None:
-    args = parse_args()
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+            "file_path", type=Path, help="Dirección del archivo con los procesos."
+            )
+    args = parser.parse_args()
 
     try:
         r = reader.Reader()
         data = r.read(args.file_path)
-        
-        new_process_list = build_process_list(data)
-        print_table(new_process_list, ["PID", "TAM(KB)", "TA", "TI"])
+
+        new_queue = QueueNew(10)
+        new_queue.build(data)
+        print_table("Tabla de cola de nuevos recien cargada:", new_queue.get_data(), ["PID", "TAM(KB)", "TA", "TI"])
+
+        ready_queue = QueueReady(5)
+        ready_queue.load_list(new_queue)
+
+        print_table("Tabla de cola de nuevos después de cargar la cola de listos:", new_queue.get_data(), ["PID", "TAM(KB)", "TA", "TI"])
+        print_table("Tabla de cola de listos:", ready_queue.get_data(), ["PID", "TAM(KB)", "TA", "TI"])
 
     except ValueError as e:
         print(f"Error: Extensión incorrecta. {e}")
