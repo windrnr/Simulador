@@ -1,5 +1,5 @@
 import argparse
-import reader
+from reader import read_data
 from sim import print_table, QueueNew, QueueReady
 from pathlib import Path
 
@@ -17,8 +17,7 @@ def main() -> None:
     args = parser.parse_args()
 
     try:
-        r = reader.Reader()
-        data = r.read(args.file_path)
+        data = read_data(args.file_path)
 
         new_queue = QueueNew(10)
         new_queue.build(data)

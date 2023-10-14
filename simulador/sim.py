@@ -37,7 +37,7 @@ class Queue(ABC):
         return True
 
 class QueueNew(Queue):
-    def build(self, data:dict):
+    def build(self, data: dict):
         for p in data.values():
             self.add_process(Process(p))
 
