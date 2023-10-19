@@ -15,7 +15,7 @@ def read_data(file_path: Path) -> dict:
         case '.json':
             data = json_reader(file_path)
         case _:
-            raise ValueError(f"El archivo de entrada debe ser '.csv' o '.json'.")
+            raise ValueError("El archivo de entrada debe ser '.csv' o '.json'.")
 
     return data
         
@@ -28,8 +28,8 @@ def json_reader(file_path: Path) -> dict:
         json_data = json.load(json_file)
         if isinstance(json_data, list):
             for item in json_data:
-                l = list(item.values())
-                data[key] = l
+                row = list(item.values())
+                data[key] = row 
                 key += 1
 
     return data

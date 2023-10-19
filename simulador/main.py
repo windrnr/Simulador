@@ -1,14 +1,7 @@
 import argparse
-from reader import read_data
-from sim import print_table, QueueNew, QueueReady
+from sim import Queue, print_table
 from pathlib import Path
 
-# Responsabilidades de main:
-# 1) Encargarse solamente de manejar los errores que vayan subiendo del resto de la ejecución del programa.
-# 2) Llamar a los procesos principales del simulador (Que se encuentran en sim.py)
-
-#TODO:
-# 1. Abstraer toda la implementación del simulador fuera de main.py
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -17,17 +10,15 @@ def main() -> None:
     args = parser.parse_args()
 
     try:
-        data = read_data(args.file_path)
+        new_queue = Queue(10)
+        new_queue.load_from_file(args.file_path)
+        print_table("->> Tabla de cola de nuevos recien cargada:", new_queue._data, ["PID", "TAM(KB)", "TA", "TI"])
 
-        new_queue = QueueNew(10)
-        new_queue.build(data)
-        print_table("Tabla de cola de nuevos recien cargada:", new_queue.get_data(), ["PID", "TAM(KB)", "TA", "TI"])
+        ready_queue = Queue(5)
+        ready_queue.load_from_queue(new_queue)
 
-        ready_queue = QueueReady(5)
-        ready_queue.load_list(new_queue)
-
-        print_table("Tabla de cola de nuevos después de cargar la cola de listos:", new_queue.get_data(), ["PID", "TAM(KB)", "TA", "TI"])
-        print_table("Tabla de cola de listos:", ready_queue.get_data(), ["PID", "TAM(KB)", "TA", "TI"])
+        print_table("->> Tabla de cola de nuevos después de cargar la cola de listos:", new_queue._data, ["PID", "TAM(KB)", "TA", "TI"])
+        print_table("->> Tabla de cola de listos:", ready_queue._data, ["PID", "TAM(KB)", "TA", "TI"])
 
     except ValueError as e:
         print(f"Error: Extensión incorrecta. {e}")
