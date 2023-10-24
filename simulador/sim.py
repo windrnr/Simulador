@@ -1,4 +1,3 @@
-from abc import ABC
 from process import Process
 from tabulate import tabulate
 from reader import read_data
@@ -18,7 +17,7 @@ def print_table(title: str, data: list[Process], headers: list) -> None:
     )
 
 
-class Queue(ABC):
+class Queue:
     def __init__(self, capacity: int) -> None:
         self._capacity: int = capacity
         self._lenght: int = 0
