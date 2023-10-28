@@ -2,10 +2,10 @@ init:
 	pip install -r requirements.txt
 
 run:
-	python3 ./simulador/main.py ./test/test.csv
+	python3 ./src/main.py ./test/test.csv
 
 compile:
-	nuitka3 --standalone --onefile -o Simulador --output-dir=./build ./simulador/main.py
+	nuitka3 --standalone --onefile -o Simulador --output-dir=./build ./src/main.py
 
 .PHONY: clean init test
 clean:
