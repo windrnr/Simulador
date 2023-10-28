@@ -60,7 +60,7 @@ def main() -> None:
                 if (cola_nuevos.peek().get_tiempo_arribo() <= clock):
                     continue
                 break
-
+            
             # Best-Fit:
             while(True): # TODO: Actualizar con la correcta evaluación de salida
                 if (memoria_principal.particion_pequeña.usada == False):
@@ -82,12 +82,23 @@ def main() -> None:
                             memoria_secundaria.append(cola_listos.unshift())
 
                 break # TODO: Retirar esto cuando se conozca bien la condición de salida
+            
 
+            # Round-Robin:
             if(CPU == None):
                 quantum = 2
                 # Ver si está bien sumarle +1 al clock en este instante
                 clock += 1
+                proceso = memoria_principal.procesos.peek()
+                # TODO: Fijarme que cuando cargo procesos de un archivo, no haya alguno con un tiempo de irrupcion <= 0
+                proceso.tiempo_irrupcion -= 1
+                if (proceso.tiempo_irrupcion == 0):
+                    CPU = None
+                    # TODO: Ver como actualizar el estado de la partición correspondiente
 
+                    if (cola_listos.largo == 0 and cola_nuevos.largo == 0):
+                        break
+                    
 
 
                 
