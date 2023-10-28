@@ -2,6 +2,7 @@ from process import Proceso
 from tabulate import tabulate
 from reader import read_data
 
+
 def print_table(title: str, data: list[Proceso], headers: list) -> None:
     """
     Imprime por pantalla una tabla con los procesos dentro de una lista.
@@ -22,7 +23,7 @@ class ColaCircular:
         self.largo = 0
         # Revisar si esto es la mejor idea, lo hice así porque no puedo indexar una lista vacía en python.
         # Me parece que puede llegar a traer errores cuando querramos sacar datos del rendimiento del simulador.
-        self.buffer = [Proceso([0, 0, 0, 0])] * tamaño
+        self.buffer = [Proceso([0,0,0,0])] * tamaño
         self.tail = self.head = 0
 
     def shift(self, item) -> None:
@@ -44,6 +45,9 @@ class ColaCircular:
         self.head = (self.head + 1) % self.tamaño
         self.largo -= 1
         return item
+    
+    def peek(self):
+        return self.buffer[self.head]
 
 
 def cargar_desde_archivo(destino: ColaCircular, fuente):
