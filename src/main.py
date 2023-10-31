@@ -36,53 +36,96 @@ def main() -> None:
                 cola_listos.shift(proceso)
 
 
-
+                #TODO: ESTO DEBERÍA SER UN WHILE?
                 if (cola_nuevos.peek().get_tiempo_arribo() <= clock):
                     continue
                 break
             
-            print_table(
-                    "->> Carga de trabajo:",
-                    cola_listos.buffer,
-                    ["PID", "TAM(KB)", "TA", "TI"],
-                    )
-            # Best-Fit:
+
+            # Primera carga:
+            cola_ejecucion = []
             while(True): # TODO: Actualizar con la correcta evaluación de salida
                 if (memoria_principal.particion_pequeña.usada == False):
                     if (cola_listos.peek().get_tamaño() <= memoria_principal.particion_pequeña.tamaño):
-                        memoria_principal.procesos.shift(cola_listos.unshift())
-                        memoria_principal.particion_pequeña.usada = True
+                        particion = memoria_principal.particion_pequeña
+                        particion.usada = True
+                        proceso = cola_listos.unshift()
+                        if (proceso):
+                            proceso.cargado = True
+
+                        cola_ejecucion.append((proceso, particion))
+
                         continue
                     elif (memoria_principal.particion_mediana.usada == False):
                         if (cola_listos.peek().get_tamaño() <= memoria_principal.particion_mediana.tamaño):
-                            memoria_principal.procesos.shift(cola_listos.unshift())
-                            memoria_principal.particion_mediana.usada = True
+                            particion = memoria_principal.particion_mediana
+                            particion.usada = True
+                            proceso = cola_listos.unshift()
+
+                            cola_ejecucion.append((proceso, particion))
                             continue
                         elif (memoria_principal.particion_grande.usada == False):
-                            memoria_principal.procesos.shift(cola_listos.unshift())
-                            memoria_principal.particion_grande.usada = True
+                            particion = memoria_principal.particion_grande
+                            particion.usada = True
+                            proceso = cola_listos.unshift()
+
+                            cola_ejecucion.append((proceso, particion))
                             continue
                         else: 
                             # TODO: REVISAR ESTO
                             memoria_secundaria.append(cola_listos.unshift())
 
-                break # TODO: Retirar esto cuando se conozca bien la condición de salida
+                break # TODO: <-Retirar esto cuando se conozca bien la condición de salida
             
 
             # Round-Robin:
             if(CPU == None):
                 quantum = 2
-                # Ver si está bien sumarle +1 al clock en este instante
+                proceso, particion = cola_ejecucion.pop()
+                
                 clock += 1
-                proceso = memoria_principal.procesos.peek()
-                # TODO: Fijarme que cuando cargo procesos de un archivo, no haya alguno con un tiempo de irrupcion <= 0
                 proceso.tiempo_irrupcion -= 1
+                # TODO: Fijarme que cuando cargo procesos de un archivo, no haya alguno con un tiempo de irrupcion <= 0
                 if (proceso.tiempo_irrupcion == 0):
                     CPU = None
-                    # TODO: Ver como actualizar el estado de la partición correspondiente
-
+                    particion.usada = False
                     if (cola_listos.largo == 0 and cola_nuevos.largo == 0):
-                        break
+                        break 
+                else:
+                    quantum -= 1
+                    if (quantum == 0):
+                        cola_listos.shift(proceso)
+                        particion.usada = False
+                        CPU = None
+                    else:
+                        print("TODO")
+                
+                proceso_n = cola_listos.unshift()
+                if (proceso_n):
+                    if(not proceso_n.cargado):
+                        # Best-Fit
+                        print("TODO")
+
+                        min = particion, particion.tamaño - proceso_n.tamaño 
+                        for particion in memoria_principal.particiones:
+                            frag_in = particion.tamaño - proceso_n.tamaño
+                            if(min[1] > frag_in and frag_in >= 0):
+                                min = particion, frag_in 
+
+                        if(min[0].usada):
+                            proceso.cargado = False
+                        else:
+                            proceso_n.cargado = True
+                            min[0].usada = True
+                        # Una mejor solución podría ser que particion conozca al proceso que alberga en un instante.
+
+
+
+
+
+
+
+
                     
 
             break
