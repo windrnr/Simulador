@@ -1,6 +1,6 @@
 from pathlib import Path
-import csv
 import json
+import csv
 
 
 def read_data(file_path: Path) -> dict:

@@ -1,28 +1,6 @@
 import argparse
-from os import memfd_create
-from sim import print_table, cargar_desde_cola, cargar_desde_archivo, ColaCircular, Proceso
 from pathlib import Path
-
-
-class Memoria:
-    def __init__(self, layout: list):
-        self.particion_pequeña: Particion = layout[1]
-        self.particion_mediana: Particion = layout[2]
-        self.particion_grande: Particion = layout[3]
-        self.procesos = ColaCircular(3)
-
-class Particion:
-    def __init__(self, tamaño: int):
-        self.tamaño = tamaño
-        self.frag_interna = 0
-        self.usada = False
-
-def asign(p: Particion, size: int):
-    q, r = divmod(p.tamaño, size)
-    p.tamaño -= q * size
-    p.frag_interna = r
-    p.usada = True
-
+from sim import cargar_desde_archivo, ColaCircular, print_table, Particion, Memoria
 
 def main() -> None:
     parser = argparse.ArgumentParser()
@@ -57,10 +35,17 @@ def main() -> None:
                 proceso = cola_nuevos.unshift()
                 cola_listos.shift(proceso)
 
+
+
                 if (cola_nuevos.peek().get_tiempo_arribo() <= clock):
                     continue
                 break
             
+            print_table(
+                    "->> Carga de trabajo:",
+                    cola_listos.buffer,
+                    ["PID", "TAM(KB)", "TA", "TI"],
+                    )
             # Best-Fit:
             while(True): # TODO: Actualizar con la correcta evaluación de salida
                 if (memoria_principal.particion_pequeña.usada == False):
@@ -100,14 +85,6 @@ def main() -> None:
                         break
                     
 
-
-                
-
-
-
-
-
-            
             break
 
     except ValueError as e:

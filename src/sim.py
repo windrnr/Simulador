@@ -1,7 +1,50 @@
-from process import Proceso
 from tabulate import tabulate
 from reader import read_data
 
+
+class Memoria:
+    def __init__(self, layout: list):
+        self.particion_pequeña: Particion = layout[1]
+        self.particion_mediana: Particion = layout[2]
+        self.particion_grande: Particion = layout[3]
+        self.procesos = ColaCircular(3)
+
+class Particion:
+    def __init__(self, tamaño: int):
+        self.tamaño = tamaño
+        self.frag_interna = 0
+        self.usada = False
+
+class Proceso:
+    def __init__(self, data: list[int]):
+        self.pid = data[0]
+        self.tamaño = data[1]
+        self.tiempo_arribo = data[2]
+        self.tiempo_irrupcion = data[3]
+        # self.ejecutando = False
+        self.particion = Particion
+
+    def return_list_of_data(self) -> list:
+        data = []
+        data.append(self.pid)
+        data.append(self.tamaño)
+        data.append(self.tiempo_arribo)
+        data.append(self.tiempo_irrupcion)
+
+        return data
+
+    def get_tiempo_arribo(self) -> int:
+        return self.tiempo_arribo
+
+    def get_tamaño(self) -> int:
+        return self.tamaño
+
+
+def asign(p: Particion, size: int):
+    q, r = divmod(p.tamaño, size)
+    p.tamaño -= q * size
+    p.frag_interna = r
+    p.usada = True
 
 def print_table(title: str, data: list[Proceso], headers: list) -> None:
     """
@@ -15,7 +58,7 @@ def print_table(title: str, data: list[Proceso], headers: list) -> None:
         f"{title}\n"
         + tabulate(outer, headers, tablefmt="fancy_outline", stralign="center")
     )
-
+    
 
 class ColaCircular:
     def __init__(self, tamaño: int):
@@ -74,3 +117,28 @@ def cargar_desde_cola(destino: ColaCircular, fuente: ColaCircular):
         # Revisar en la definición de unshift, cómo liberar la memoria que dejar de estar contenida entre head y tail.
         proceso = fuente.unshift()
         destino.shift(proceso)
+class Proceso:
+    def __init__(self, data: list[int]):
+        self.pid = data[0]
+        self.tamaño = data[1]
+        self.tiempo_arribo = data[2]
+        self.tiempo_irrupcion = data[3]
+        # self.ejecutando = False
+        self.particion = Particion
+
+    def return_list_of_data(self) -> list:
+        data = []
+        data.append(self.pid)
+        data.append(self.tamaño)
+        data.append(self.tiempo_arribo)
+        data.append(self.tiempo_irrupcion)
+
+        return data
+
+    def get_tiempo_arribo(self) -> int:
+        return self.tiempo_arribo
+
+    def get_tamaño(self) -> int:
+        return self.tamaño
+
+
