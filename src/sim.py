@@ -4,24 +4,13 @@ from reader import read_data
 
 class Memoria:
     def __init__(self, layout: list):
-        self.particion_pequeña: Particion = layout[1]
-        self.particion_mediana: Particion = layout[2]
-        self.particion_grande: Particion = layout[3]
         self.particiones = layout[1:]
-        self.ejecucion = ColaCircular(3)
 
 class Particion:
     def __init__(self, tamaño: int):
-        self.tamaño = tamaño
+        self.tamaño: int = tamaño
         self.frag_interna = 0
-        self.usada = False
-
-# Revisar si esto sigue sirviendo
-def asign(p: Particion, size: int):
-    q, r = divmod(p.tamaño, size)
-    p.tamaño -= q * size
-    p.frag_interna = r
-    p.usada = True
+        self.proceso: Proceso | None = None
 
 class Proceso:
     def __init__(self, data: list[int]):
@@ -29,7 +18,8 @@ class Proceso:
         self.tamaño = data[1]
         self.tiempo_arribo = data[2]
         self.tiempo_irrupcion = data[3]
-        self.cargado = False
+        self.estado = "Nuevo"
+        self.particion: Particion | None = None
 
     def return_list_of_data(self) -> list:
         data = []
@@ -39,12 +29,6 @@ class Proceso:
         data.append(self.tiempo_irrupcion)
 
         return data
-
-    def get_tiempo_arribo(self) -> int:
-        return self.tiempo_arribo
-
-    def get_tamaño(self) -> int:
-        return self.tamaño
 
 
 class ColaCircular:
@@ -65,7 +49,7 @@ class ColaCircular:
         self.tail = (self.tail + 1) % self.tamaño
         self.largo += 1
 
-    def unshift(self):
+    def unshift(self) -> Proceso | None:
         if self.largo == 0:
             print("La cola está vacía")
             return
@@ -88,11 +72,11 @@ def cargar_desde_archivo(destino: ColaCircular, fuente):
 
     for p in data.values():
         proceso = Proceso(p)
-        if proceso.get_tamaño() <= 250:
+        if proceso.tamaño <= 250:
             destino.shift(proceso)
         continue
 
-    destino.buffer.sort(key=lambda x: x.get_tiempo_arribo())
+    destino.buffer.sort(key=lambda x: x.tiempo_arribo)
 
 
 # Puede ser que lo borramos
