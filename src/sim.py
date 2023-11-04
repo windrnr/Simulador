@@ -1,23 +1,23 @@
 from tabulate import tabulate
 from reader import read_data
 
-
 class Memoria:
     def __init__(self, layout: list):
-        self.particiones = layout[1:]
+        self.particiones: list[Particion] = layout[1:]
 
 class Particion:
     def __init__(self, tamaño: int):
         self.tamaño: int = tamaño
-        self.frag_interna = 0
+        self.frag_interna: int = 0
         self.proceso: Proceso | None = None
+
 
 class Proceso:
     def __init__(self, data: list[int]):
-        self.pid = data[0]
-        self.tamaño = data[1]
-        self.tiempo_arribo = data[2]
-        self.tiempo_irrupcion = data[3]
+        self.pid:int = data[0]
+        self.tamaño:int  = data[1]
+        self.tiempo_arribo: int = data[2]
+        self.tiempo_irrupcion: int = data[3]
         self.estado = "Nuevo"
         self.particion: Particion | None = None
 
@@ -37,7 +37,7 @@ class ColaCircular:
         self.largo = 0
         # Revisar si esto es la mejor idea, lo hice así porque no puedo indexar una lista vacía en python.
         # Me parece que puede llegar a traer errores cuando querramos sacar datos del rendimiento del simulador.
-        self.buffer = [Proceso([0,0,0,0])] * tamaño
+        self.buffer = [Proceso([0, 0, 0, 0])] * tamaño
         self.tail = self.head = 0
 
     def shift(self, item) -> None:
@@ -59,7 +59,7 @@ class ColaCircular:
         self.head = (self.head + 1) % self.tamaño
         self.largo -= 1
         return item
-    
+
     def peek(self):
         return self.buffer[self.head]
 
@@ -103,5 +103,3 @@ def print_table(title: str, data: list[Proceso], headers: list) -> None:
         f"{title}\n"
         + tabulate(outer, headers, tablefmt="fancy_outline", stralign="center")
     )
-    
-

@@ -6,7 +6,7 @@ def asignacion_a_memoria(cola_nuevos, cola_listos, memoria_principal, clock):
     while (cola_nuevos.peek().tiempo_arribo <= clock):
         if (cola_listos.largo < 5):
             particiones = memoria_principal.particiones
-            i = 0
+            i = 1
             for _ in memoria_principal.particiones:
                 proceso = cola_nuevos.unshift()
                 if (proceso):
@@ -14,19 +14,19 @@ def asignacion_a_memoria(cola_nuevos, cola_listos, memoria_principal, clock):
                         match proceso.tamaño:
                             case n if n <= 60:
                                 proceso.estado = "Listo"
-                                particiones[0].proceso = proceso
-                                particiones[0].frag_interna = particiones[0].tamaño - proceso.tamaño
-                                proceso.particion = particiones[0]
-                            case n if n <= 120:
-                                proceso.estado = "Listo"
                                 particiones[1].proceso = proceso
                                 particiones[1].frag_interna = particiones[1].tamaño - proceso.tamaño
                                 proceso.particion = particiones[1]
-                            case n if n <= 250:
+                            case n if n <= 120:
                                 proceso.estado = "Listo"
                                 particiones[2].proceso = proceso
                                 particiones[2].frag_interna = particiones[2].tamaño - proceso.tamaño
                                 proceso.particion = particiones[2]
+                            case n if n <= 250:
+                                proceso.estado = "Listo"
+                                particiones[3].proceso = proceso
+                                particiones[3].frag_interna = particiones[3].tamaño - proceso.tamaño
+                                proceso.particion = particiones[3]
                     else:
                         proceso.estado = "Suspendido"
                         cola_listos.shift(proceso)
@@ -86,7 +86,7 @@ def simulador(cola_nuevos):
         
         proceso = cola_listos.unshift()
         min_frag = 9000
-        min_particion = memoria_principal.particiones[0]
+        min_particion = memoria_principal.particiones[1]
         if (proceso):
             for particion in memoria_principal.particiones:
                 frag_generada = particion.tamaño - proceso.tamaño
@@ -119,7 +119,6 @@ def main() -> None:
         cola_nuevos = ColaCircular(10)
         cargar_desde_archivo(cola_nuevos, args.file_path)
         simulador(cola_nuevos)
-        print("Termino!")
 
 
     except ValueError as e:
