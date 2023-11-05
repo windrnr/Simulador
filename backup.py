@@ -4,7 +4,7 @@ from sim import (
     Proceso,
     generar_desde_archivo,
     ColaCircular,
-    print_table,
+    tabla,
     Particion,
     Memoria,
 )
@@ -48,7 +48,7 @@ def asignacion_a_memoria(cola_nuevos, cola_listos, memoria_principal, clock):
 
 
 def simulador(cola_nuevos):
-    print_table(
+    tabla(
         "->> Carga de trabajo:",
         cola_nuevos.buffer,
         ["PID", "TAM(KB)", "TA", "TI"],

@@ -29,6 +29,7 @@ class Proceso:
         data.append(self.tamaño)
         data.append(self.tiempo_arribo)
         data.append(self.tiempo_irrupcion)
+        data.append(self.estado)
 
         return data
 
@@ -39,7 +40,7 @@ class ColaCircular:
         self.largo = 0
         # Revisar si esto es la mejor idea, lo hice así porque no puedo indexar una lista vacía en python.
         # Me parece que puede llegar a traer errores cuando querramos sacar datos del rendimiento del simulador.
-        self.buffer = [Proceso([0,0,0,0]) for _ in range(tamaño)]
+        self.buffer = [Proceso([0, 0, 0, 0]) for _ in range(tamaño)]
         self.tail = self.head = 0
 
     def shift(self, item) -> None:
@@ -87,7 +88,7 @@ def generar_desde_archivo(fuente, tamaño: int) -> ColaCircular:
     return resultado
 
 
-def print_table(title: str, data: list[Proceso], headers: list) -> None:
+def tabla(title: str, data: list[Proceso], headers: list) -> None:
     """
     Imprime por pantalla una tabla con los procesos dentro de una lista.
     """
@@ -101,10 +102,17 @@ def print_table(title: str, data: list[Proceso], headers: list) -> None:
     )
 
 
-def asignacion_a_memoria(cola_nuevos: ColaCircular, cola_listos: ColaCircular, memoria_principal: Memoria, clock: int):
+def asignacion_a_memoria(
+    cola_nuevos: ColaCircular,
+    cola_listos: ColaCircular,
+    memoria_principal: Memoria,
+    clock: int,
+):
     while (cola_nuevos.largo > 0) and (cola_nuevos.peek().tiempo_arribo <= clock):
         # DEBUG
+        print("La cabeza de la cola de nuevos en el tiempo",clock,":")
         print(cola_nuevos.peek().return_list_of_data())
+        print("\n")
         # DEBUG
 
         if cola_listos.largo < 5:
@@ -146,10 +154,10 @@ def asignacion_a_memoria(cola_nuevos: ColaCircular, cola_listos: ColaCircular, m
 def run(filepath):
     cola_nuevos = generar_desde_archivo(filepath, 10)
 
-    print_table(
-        "->> Carga de trabajo:",
+    tabla(
+        "->> Carga de trabajo - Cola de Nuevos:",
         cola_nuevos.buffer,
-        ["PID", "TAM(KB)", "TA", "TI"],
+        ["PID", "TAM(KB)", "TA", "TI", "ESTADO"],
     )
     memoria_principal = Memoria(
         [Particion(100), Particion(60), Particion(120), Particion(250)]
@@ -162,8 +170,13 @@ def run(filepath):
     while clock != cola_nuevos.peek().tiempo_arribo:
         clock += 1
 
-    while (True):
+    while True:
         asignacion_a_memoria(cola_nuevos, cola_listos, memoria_principal, clock)
+        tabla(
+        "->> Carga de trabajo - Cola de Listos:",
+        cola_listos.buffer,
+        ["PID", "TAM(KB)", "TA", "TI", "ESTADO"],
+        )
 
         # Round-Robin:
         if CPU_LIBRE:
@@ -175,7 +188,11 @@ def run(filepath):
             proceso.estado = "Ejecutando"
             proceso.tiempo_irrupcion -= 1
             if proceso.tiempo_irrupcion == 0:
-                proceso.estado = "Finalizado"
+                proceso.estado = "Finalizado" 
+                #DEBUG
+                print("Finalizado:")
+                print(proceso.return_list_of_data())
+                #DEBUG
                 if proceso.particion:
                     proceso.particion.proceso = None
                 # Me interesaría cambiarle el estado al proceso cuando se termina?
@@ -218,13 +235,13 @@ def run(filepath):
 
         continue
 
-    print_table(
-        "->> Carga de trabajo:",
+    tabla(
+        "->> Carga de trabajo - Cola de Nuevos:",
         cola_nuevos.buffer,
-        ["PID", "TAM(KB)", "TA", "TI"],
+        ["PID", "TAM(KB)", "TA", "TI", "ESTADO"],
     )
-    print_table(
-        "->> Carga de trabajo:",
+    tabla(
+        "->> Carga de trabajo - Cola de Listos:",
         cola_listos.buffer,
-        ["PID", "TAM(KB)", "TA", "TI"],
+        ["PID", "TAM(KB)", "TA", "TI", "ESTADO"],
     )
