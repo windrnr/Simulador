@@ -110,9 +110,9 @@ def asignacion_a_memoria(
 ):
     while (cola_nuevos.largo > 0) and (cola_nuevos.peek().tiempo_arribo <= clock):
         # DEBUG
-        print("La cabeza de la cola de nuevos en el tiempo",clock,":")
-        print(cola_nuevos.peek().return_list_of_data())
-        print("\n")
+        # print("La cabeza de la cola de nuevos en el tiempo", clock, ":")
+        # print(cola_nuevos.peek().return_list_of_data())
+        # print("\n")
         # DEBUG
 
         if cola_listos.largo < 5:
@@ -151,14 +151,23 @@ def asignacion_a_memoria(
                     index += 1
 
 
-def run(filepath):
-    cola_nuevos = generar_desde_archivo(filepath, 10)
-
+def mostrar_estado(cola_nuevos, cola_listos, clock):
+    print("En el tiempo de clock:", clock)
     tabla(
         "->> Carga de trabajo - Cola de Nuevos:",
         cola_nuevos.buffer,
         ["PID", "TAM(KB)", "TA", "TI", "ESTADO"],
     )
+    tabla(
+        "->> Carga de trabajo - Cola de Listos:",
+        cola_listos.buffer,
+        ["PID", "TAM(KB)", "TA", "TI", "ESTADO"],
+    )
+
+
+def run(cola_nuevos):
+    
+    print("-- SIMULADOR -- (Fix me!)")
     memoria_principal = Memoria(
         [Particion(100), Particion(60), Particion(120), Particion(250)]
     )
@@ -172,27 +181,26 @@ def run(filepath):
 
     while True:
         asignacion_a_memoria(cola_nuevos, cola_listos, memoria_principal, clock)
-        tabla(
-        "->> Carga de trabajo - Cola de Listos:",
-        cola_listos.buffer,
-        ["PID", "TAM(KB)", "TA", "TI", "ESTADO"],
-        )
+        # mostrar_estado(cola_nuevos, cola_listos)
 
         # Round-Robin:
         if CPU_LIBRE:
             quantum = 2
 
         clock += 1
+        mostrar_estado(cola_nuevos, cola_listos, clock)
+        input("[o] Ingrese Enter para continuar al siguiente tiempo de clock:")
+
         proceso = cola_listos.unshift()
         if proceso:
             proceso.estado = "Ejecutando"
             proceso.tiempo_irrupcion -= 1
             if proceso.tiempo_irrupcion == 0:
-                proceso.estado = "Finalizado" 
-                #DEBUG
-                print("Finalizado:")
-                print(proceso.return_list_of_data())
-                #DEBUG
+                proceso.estado = "Finalizado"
+                # DEBUG
+                # print("Finalizado:")
+                # print(proceso.return_list_of_data())
+                # DEBUG
                 if proceso.particion:
                     proceso.particion.proceso = None
                 # Me interesaría cambiarle el estado al proceso cuando se termina?
@@ -204,6 +212,8 @@ def run(filepath):
                     break
             else:
                 quantum -= 1
+                # mostrar_estado(cola_nuevos, cola_listos)
+                # input("Ingrese enter para continuar al siguiente tiempo de clock")
                 if not quantum == 0:
                     continue
 
@@ -234,14 +244,6 @@ def run(filepath):
             min_particion.proceso = proceso
 
         continue
-
-    tabla(
-        "->> Carga de trabajo - Cola de Nuevos:",
-        cola_nuevos.buffer,
-        ["PID", "TAM(KB)", "TA", "TI", "ESTADO"],
-    )
-    tabla(
-        "->> Carga de trabajo - Cola de Listos:",
-        cola_listos.buffer,
-        ["PID", "TAM(KB)", "TA", "TI", "ESTADO"],
-    )
+    
+    print("estado final")
+    mostrar_estado(cola_nuevos, cola_listos, clock)
