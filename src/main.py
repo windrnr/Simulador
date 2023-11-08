@@ -36,6 +36,25 @@ def validar_carga(answers, current):
         )
 
 
+def validar_path(answers, current):
+    file_path = Path(PurePath(current))
+
+    if not Path.exists(file_path):
+        raise errors.ValidationError(
+            "", reason=f"Ha ocurrido un error abriendo '{file_path}'."
+        )
+
+    if Path.is_dir(file_path):
+        raise errors.ValidationError("", reason=f"'{file_path}' es un directorio.")
+
+    if file_path.suffix != ".csv" and file_path.suffix != ".json":
+        raise errors.ValidationError(
+            "", reason="El archivo de entrada debe ser '.csv' o '.json'."
+        )
+
+    return True
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -64,12 +83,24 @@ def main() -> None:
                 entrada = respuestas["opción"]
                 if entrada is not None:
                     if entrada == "Archivo":
+                        # TODO: Considerar si puedo realizar un inquirer.Text y en la función para validar mover el control que hago en Reader sobre la existencia y extensión del archivo. Así puedo volver a pedirle la entrada hasta que funcione.
+                        respuesta = inquirer.Text(
+                            [
+                                inquirer.Text(
+                                    name="path",
+                                    message="Ingrese el path hacia el archivo",
+                                    validate=validar_carga,
+                                )
+                            ]
+                        )
+
                         respuesta = inquirer.prompt(
                             [
                                 inquirer.Path(
                                     "path",
                                     message="Ingrese el path hacia el archivo",
                                     path_type=inquirer.Path.FILE,
+                                    validate=validar_path,
                                 ),
                             ]
                         )

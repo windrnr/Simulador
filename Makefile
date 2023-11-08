@@ -1,7 +1,10 @@
 init: 
 	pip install -r requirements.txt
 
-run:
+run: 
+	python3 ./src/main.py 
+
+run_file:
 	python3 ./src/main.py ./test/test.csv
 
 compile:

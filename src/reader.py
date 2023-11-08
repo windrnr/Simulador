@@ -7,19 +7,16 @@ def read_data(file_path: Path) -> dict:
     """
     Devuelve un dictionary con el contenido del archivo.
     """
-    if not Path.exists(file_path):
-        raise FileNotFoundError(f"Ha ocurrido un error abriendo '{file_path}'.")
+    # if not Path.exists(file_path):
+    #     raise FileNotFoundError(f"Ha ocurrido un error abriendo '{file_path}'.")
 
-    if Path.is_dir(file_path):
-        raise IsADirectoryError(f"'{file_path}' es un directorio.")
+    # if Path.is_dir(file_path):
+    #     raise IsADirectoryError(f"'{file_path}' es un directorio.")
 
-    match file_path.suffix:
-        case ".csv":
-            data = csv_reader(file_path)
-        case ".json":
-            data = json_reader(file_path)
-        case _:
-            raise ValueError("El archivo de entrada debe ser '.csv' o '.json'.")
+    if file_path.suffix == ".csv":
+        data = csv_reader(file_path)
+    else:
+        data = json_reader(file_path)
 
     return data
 
