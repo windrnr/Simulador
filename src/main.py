@@ -41,7 +41,7 @@ def validar_path(answers, current):
 
     if not Path.exists(file_path):
         raise errors.ValidationError(
-            "", reason=f"Ha ocurrido un error abriendo '{file_path}'."
+            "", reason=f"Ha ocurrido un error abriendo '{file_path}', no existe o no ha podido ser encontrado."
         )
 
     if Path.is_dir(file_path):
@@ -83,17 +83,6 @@ def main() -> None:
                 entrada = respuestas["opción"]
                 if entrada is not None:
                     if entrada == "Archivo":
-                        # TODO: Considerar si puedo realizar un inquirer.Text y en la función para validar mover el control que hago en Reader sobre la existencia y extensión del archivo. Así puedo volver a pedirle la entrada hasta que funcione.
-                        respuesta = inquirer.Text(
-                            [
-                                inquirer.Text(
-                                    name="path",
-                                    message="Ingrese el path hacia el archivo",
-                                    validate=validar_carga,
-                                )
-                            ]
-                        )
-
                         respuesta = inquirer.prompt(
                             [
                                 inquirer.Path(
