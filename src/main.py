@@ -2,7 +2,7 @@ import inquirer
 from inquirer import errors
 import argparse
 from pathlib import Path, PurePath
-from sim import ColaCircular, Proceso, run, generar_desde_archivo
+from sim import Proceso, run, generar_desde_archivo
 import os
 
 
@@ -130,7 +130,7 @@ def main() -> None:
                         )
                         if respuesta is not None:
                             numero = int(respuesta["numero_procesos"])
-                            cola_nuevos = ColaCircular(10)
+                            cola_nuevos = []
                             for i in range(1, numero + 1):
                                 print("Progreso:", i, "/", numero)
                                 respuestas = inquirer.prompt(preguntas)
@@ -140,7 +140,7 @@ def main() -> None:
                                     data.append(int(respuestas["tamaño"]))
                                     data.append(int(respuestas["tiempo_arribo"]))
                                     data.append(int(respuestas["tiempo_irrupcion"]))
-                                    cola_nuevos.shift(Proceso(data))
+                                    cola_nuevos.append(Proceso(data))
 
                             clear_screen()
                             run(cola_nuevos)
