@@ -84,6 +84,7 @@ def generar_desde_archivo(fuente, tamaño: int) -> ColaCircular:
             resultado.shift(proceso)
         continue
 
+    resultado.buffer = [p for p in resultado.buffer if p.tiempo_irrupcion > 0]
     resultado.buffer.sort(key=lambda x: x.tiempo_arribo)
     return resultado
 
@@ -100,6 +101,27 @@ def tabla(title: str, data: list[Proceso], headers: list) -> None:
         f"{title}\n"
         + tabulate(outer, headers, tablefmt="fancy_outline", stralign="center")
     )
+
+
+def mostrar_estado(cola_nuevos, cola_listos, clock):
+    print("[!] - En el tiempo de clock:", clock)
+    tabla(
+        "->> Carga de trabajo - Cola de Nuevos:",
+        cola_nuevos.buffer,
+        ["PID", "TAM(KB)", "TA", "TI", "ESTADO"],
+    )
+    tabla(
+        "->> Carga de trabajo - Cola de Listos:",
+        cola_listos.buffer,
+        ["PID", "TAM(KB)", "TA", "TI", "ESTADO"],
+    )
+
+
+def asignar(proceso: Proceso, particion: Particion):
+    proceso.estado = "Listo"
+    particion.proceso = proceso
+    particion.frag_interna = particion.tamaño - proceso.tamaño
+    proceso.particion = particion
 
 
 def asignacion_a_memoria(
@@ -120,30 +142,15 @@ def asignacion_a_memoria(
             index = 0
             for _ in memoria_principal.particiones:
                 proceso = cola_nuevos.unshift()
-                if proceso:
-                    if not particiones[index].proceso:
+                if proceso is not None:
+                    if particiones[index].proceso is None:
                         match proceso.tamaño:
                             case n if n <= 60:
-                                proceso.estado = "Listo"
-                                particiones[0].proceso = proceso
-                                particiones[0].frag_interna = (
-                                    particiones[0].tamaño - proceso.tamaño
-                                )
-                                proceso.particion = particiones[0]
+                                asignar(proceso, particiones[0])
                             case n if n <= 120:
-                                proceso.estado = "Listo"
-                                particiones[1].proceso = proceso
-                                particiones[1].frag_interna = (
-                                    particiones[1].tamaño - proceso.tamaño
-                                )
-                                proceso.particion = particiones[1]
+                                asignar(proceso, particiones[1])
                             case n if n <= 250:
-                                proceso.estado = "Listo"
-                                particiones[2].proceso = proceso
-                                particiones[2].frag_interna = (
-                                    particiones[2].tamaño - proceso.tamaño
-                                )
-                                proceso.particion = particiones[2]
+                                asignar(proceso, particiones[2])
                     else:
                         proceso.estado = "Suspendido"
 
@@ -151,23 +158,8 @@ def asignacion_a_memoria(
                     index += 1
 
 
-def mostrar_estado(cola_nuevos, cola_listos, clock):
-    print("En el tiempo de clock:", clock)
-    tabla(
-        "->> Carga de trabajo - Cola de Nuevos:",
-        cola_nuevos.buffer,
-        ["PID", "TAM(KB)", "TA", "TI", "ESTADO"],
-    )
-    tabla(
-        "->> Carga de trabajo - Cola de Listos:",
-        cola_listos.buffer,
-        ["PID", "TAM(KB)", "TA", "TI", "ESTADO"],
-    )
-
-
 def run(cola_nuevos):
-    
-    print("-- SIMULADOR -- (Fix me!)")
+    print("-------------- SIMULADOR -------------- (Fix me!)")
     memoria_principal = Memoria(
         [Particion(100), Particion(60), Particion(120), Particion(250)]
     )
@@ -187,12 +179,12 @@ def run(cola_nuevos):
         if CPU_LIBRE:
             quantum = 2
 
-        clock += 1
         mostrar_estado(cola_nuevos, cola_listos, clock)
-        input("[o] Ingrese Enter para continuar al siguiente tiempo de clock:")
+        input("[!] Ingrese Enter para continuar al siguiente tiempo de clock:")
+        clock += 1
 
         proceso = cola_listos.unshift()
-        if proceso:
+        if proceso is not None:
             proceso.estado = "Ejecutando"
             proceso.tiempo_irrupcion -= 1
             if proceso.tiempo_irrupcion == 0:
@@ -201,7 +193,7 @@ def run(cola_nuevos):
                 # print("Finalizado:")
                 # print(proceso.return_list_of_data())
                 # DEBUG
-                if proceso.particion:
+                if proceso.particion is not None:
                     proceso.particion.proceso = None
                 # Me interesaría cambiarle el estado al proceso cuando se termina?
                 # Si no, dejo que el GC elimine la variable.
@@ -227,23 +219,23 @@ def run(cola_nuevos):
         proceso = cola_listos.unshift()
         min_frag = 999
         min_particion = memoria_principal.particiones[0]
-        if proceso:
+        if proceso is not None:
             for particion in memoria_principal.particiones:
                 frag_generada = particion.tamaño - proceso.tamaño
                 if min_frag >= frag_generada and frag_generada >= 0:
                     min_frag = frag_generada
                     min_particion = particion
 
-        p = min_particion.proceso
-        if p:
+        # p = min_particion.proceso
+        if (p := min_particion.proceso) is not None:
             p.estado = "Suspendido"
             cola_listos.shift(p)
 
-        if proceso:
+        if proceso is not None:
             proceso.estado = "Listo"
             min_particion.proceso = proceso
 
         continue
-    
+
     print("estado final")
     mostrar_estado(cola_nuevos, cola_listos, clock)

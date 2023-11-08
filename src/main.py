@@ -16,13 +16,23 @@ def clear_screen():
     clear()
 
 
-def validar(answers, current):
+def validar_proceso(answers, current):
     try:
         if int(current) >= 0:
             return True
     except:
         raise errors.ValidationError(
-            "", reason="El valor ingresado no es un número positivo"
+            "", reason="El valor ingresado no es un número positivo."
+        )
+
+
+def validar_carga(answers, current):
+    try:
+        if int(current) >= 5 and int(current) <= 10:
+            return True
+    except:
+        raise errors.ValidationError(
+            "", reason="El valor ingresado debe estar en el intervalo [5;10] ."
         )
 
 
@@ -71,38 +81,38 @@ def main() -> None:
                             inquirer.Text(
                                 name="pid",
                                 message="ID",
-                                validate=validar,
+                                validate=validar_proceso,
                             ),
                             inquirer.Text(
                                 name="tiempo_arribo",
                                 message="Tiempo de arribo",
-                                validate=validar,
+                                validate=validar_proceso,
                             ),
                             inquirer.Text(
                                 name="tiempo_irrupcion",
                                 message="Tiempo de irrupción",
-                                validate=validar,
+                                validate=validar_proceso,
                             ),
                             inquirer.Text(
                                 name="tamaño",
                                 message="Tamaño",
-                                validate=validar,
+                                validate=validar_proceso,
                             ),
                         ]
                         respuesta = inquirer.prompt(
                             [
                                 inquirer.Text(
                                     name="numero_procesos",
-                                    message="Ingrese el número de procesos que desea cargar",
-                                    validate=validar,
+                                    message="Ingrese el número de procesos que desea cargar (min.5, max.10)",
+                                    validate=validar_carga,
                                 )
                             ]
                         )
                         if respuesta is not None:
                             numero = int(respuesta["numero_procesos"])
                             cola_nuevos = ColaCircular(10)
-                            for i in range(1, numero):
-                                print("Progreso:", i, "/10")
+                            for i in range(1, numero + 1):
+                                print("Progreso:", i, "/", numero)
                                 respuestas = inquirer.prompt(preguntas)
                                 if respuestas is not None:
                                     data = []
@@ -110,7 +120,6 @@ def main() -> None:
                                     data.append(int(respuestas["tamaño"]))
                                     data.append(int(respuestas["tiempo_arribo"]))
                                     data.append(int(respuestas["tiempo_irrupcion"]))
-                                    print(type(respuestas["pid"]))
                                     cola_nuevos.shift(Proceso(data))
 
                             clear_screen()
