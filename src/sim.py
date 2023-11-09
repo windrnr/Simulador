@@ -141,22 +141,28 @@ def asignacion_a_memoria(
         if len(cola_listos) < 5:
             particiones = memoria_principal.particiones
             index = 0
+
+            # Acá hay un error en la carga, seguramente tenga que ver con que iteramos sobre las particiones en el loop exterior, capaz podemos deshacernos de este loop y quedarnos con el while.
             for _ in memoria_principal.particiones:
                 proceso = cola_nuevos.pop(0)
-                if proceso is not None:
-                    if particiones[index].proceso is None:
-                        match proceso.tamaño:
-                            case n if n <= 60:
-                                asignar(proceso, particiones[0])
-                            case n if n <= 120:
-                                asignar(proceso, particiones[1])
-                            case n if n <= 250:
-                                asignar(proceso, particiones[2])
+                # Utilizar un índice está causando una mal carga de los elementos, es evidente cuando se realiza una prueba de escritorio corta.
+                # Por ejemplo, con índex = 0 entra un proceso de 150 y pregunta si particiones[0] está vacía, como si lo está, entra en particiones[2]
+                # Luego con índex = 1 entra un proceso de 120 y pregunta si particiones[1] está vacía, como si lo está, entra en particiones[1]
+                # Por último con índex = 2 entra un proceso de 20 y pregunta si particiones[2] está vacía, lo que sería falso, y se marca ese proceso como "Suspendido", a pesar de que podría haber entrado en particiones[0]
+                # Podríamos usar el for _ in memoria_principal.particiones y usar una variable particion que usemos para realizar el control de los procesos
+                if particiones[index].proceso is None:
+                    tamaño = proceso.tamaño
+                    if tamaño <= 60:
+                        asignar(proceso, particiones[0])
+                    elif tamaño <= 120:
+                        asignar(proceso, particiones[1])
                     else:
-                        proceso.estado = "Suspendido"
+                        asignar(proceso, particiones[2])
+                else:
+                    proceso.estado = "Suspendido"
 
-                    cola_listos.append(proceso)
-                    index += 1
+                cola_listos.append(proceso)
+                index += 1
 
 
 def run(cola_nuevos: list[Proceso]):
@@ -166,13 +172,14 @@ def run(cola_nuevos: list[Proceso]):
     )
     clock = 0
     quantum = 2
-    cola_listos = []
+    cola_listos: list[Proceso] = []
     CPU_LIBRE = True
     tabla(
-        "->> Carga de trabajo inicial - Cola de Nuevos:",
+        "[ϴ] Carga de trabajo que ingresa al simulador (Cola de Nuevos):",
         cola_nuevos,
         ["PID", "TAM(KB)", "TA", "TI", "ESTADO"],
     )
+    print("")
 
 
     while clock != cola_nuevos[0].tiempo_arribo:
@@ -191,34 +198,32 @@ def run(cola_nuevos: list[Proceso]):
         clock += 1
 
         proceso = cola_listos.pop(0)
-        if proceso is not None:
-            proceso.estado = "Ejecutando"
-            proceso.tiempo_irrupcion -= 1
-            if proceso.tiempo_irrupcion == 0:
-                proceso.estado = "Finalizado"
-                # DEBUG
-                # print("Finalizado:")
-                # print(proceso.return_list_of_data())
-                # DEBUG
-                if proceso.particion is not None:
-                    proceso.particion.proceso = None
-                # Me interesaría cambiarle el estado al proceso cuando se termina?
-                # Si no, dejo que el GC elimine la variable.
-                CPU_LIBRE = True
 
-                if len(cola_listos) == 0 and len(cola_nuevos) == 0:
-                    # Salida
-                    break
-            else:
-                quantum -= 1
-                # mostrar_estado(cola_nuevos, cola_listos)
-                # input("Ingrese enter para continuar al siguiente tiempo de clock")
-                if not quantum == 0:
-                    continue
+        proceso.estado = "Ejecutando"
+        proceso.tiempo_irrupcion -= 1
+        if proceso.tiempo_irrupcion == 0:
+            proceso.estado = "Finalizado"
+            # DEBUG
+            # print("Finalizado:")
+            # print(proceso.return_list_of_data())
+            # DEBUG
+            if proceso.particion is not None:
+                proceso.particion.proceso = None
+            CPU_LIBRE = True
 
-                proceso.estado = "Listo"
-                cola_listos.append(proceso)
-                CPU_LIBRE = True
+            if len(cola_listos) == 0 and len(cola_nuevos) == 0:
+                # Salida
+                break
+        else:
+            quantum -= 1
+            # mostrar_estado(cola_nuevos, cola_listos)
+            # input("Ingrese enter para continuar al siguiente tiempo de clock")
+            if quantum != 0:
+                continue
+
+            proceso.estado = "Listo"
+            cola_listos.append(proceso)
+            CPU_LIBRE = True
 
         if cola_listos[0].estado == "Listo":
             continue
@@ -226,21 +231,19 @@ def run(cola_nuevos: list[Proceso]):
         proceso = cola_listos.pop(0)
         min_frag = 999
         min_particion = memoria_principal.particiones[0]
-        if proceso is not None:
-            for particion in memoria_principal.particiones:
-                frag_generada = particion.tamaño - proceso.tamaño
-                if min_frag >= frag_generada and frag_generada >= 0:
-                    min_frag = frag_generada
-                    min_particion = particion
 
-        # p = min_particion.proceso
+        for particion in memoria_principal.particiones:
+            frag_generada = particion.tamaño - proceso.tamaño
+            if min_frag >= frag_generada and frag_generada >= 0:
+                min_frag = frag_generada
+                min_particion = particion
+
         if (p := min_particion.proceso) is not None:
             p.estado = "Suspendido"
             cola_listos.append(p)
 
-        if proceso is not None:
-            proceso.estado = "Listo"
-            min_particion.proceso = proceso
+        proceso.estado = "Listo"
+        min_particion.proceso = proceso
 
         continue
 

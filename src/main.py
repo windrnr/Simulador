@@ -1,10 +1,7 @@
-import inquirer
+import os, sys, traceback, argparse, inquirer
 from inquirer import errors
-import argparse
 from pathlib import Path, PurePath
 from sim import Proceso, run, generar_desde_archivo
-import os
-
 
 def build(file_path):
     cola_nuevos = generar_desde_archivo(file_path, 10)
@@ -145,12 +142,11 @@ def main() -> None:
                             clear_screen()
                             run(cola_nuevos)
 
-    except ValueError as e:
-        print(f"Error: Extensión incorrecta. {e}")
-    except FileNotFoundError as e:
-        print(f"Error: {e} El archivo no existe o no es encontrado.")
-    except IsADirectoryError as e:
-        print(f"Error: El path: {e}")
+    except KeyboardInterrupt:
+        print("\nSimulador apagándose..")
+    except Exception:
+        traceback.print_exc(file=sys.stdout)
+    sys.exit(0)
 
 
 if __name__ == "__main__":
