@@ -1,3 +1,4 @@
+from sys import exception
 from tabulate import tabulate
 from reader import read_data
 
@@ -131,39 +132,18 @@ def asignacion_a_memoria(
     memoria_principal: Memoria,
     clock: int,
 ):
-    while (len(cola_nuevos) > 0) and (cola_nuevos[0].tiempo_arribo <= clock):
-        # DEBUG
-        # print("La cabeza de la cola de nuevos en el tiempo", clock, ":")
-        # print(cola_nuevos.peek().return_list_of_data())
-        # print("\n")
-        # DEBUG
+    while (len(cola_nuevos) > 0) and (cola_nuevos[0].tiempo_arribo <= clock) and (len(cola_listos) < 5):
+            proceso = cola_nuevos.pop(0)
+            for particion in memoria_principal.particiones:
+                if particion.proceso is None:
+                    if proceso.tamaño <= particion.tamaño:
+                        asignar(proceso, particion)
+                        break
+                    
+            if proceso.particion is None:
+                proceso.estado = "Suspendido"
 
-        if len(cola_listos) < 5:
-            particiones = memoria_principal.particiones
-            index = 0
-
-            # Acá hay un error en la carga, seguramente tenga que ver con que iteramos sobre las particiones en el loop exterior, capaz podemos deshacernos de este loop y quedarnos con el while.
-            for _ in memoria_principal.particiones:
-                proceso = cola_nuevos.pop(0)
-                # Utilizar un índice está causando una mal carga de los elementos, es evidente cuando se realiza una prueba de escritorio corta.
-                # Por ejemplo, con índex = 0 entra un proceso de 150 y pregunta si particiones[0] está vacía, como si lo está, entra en particiones[2]
-                # Luego con índex = 1 entra un proceso de 120 y pregunta si particiones[1] está vacía, como si lo está, entra en particiones[1]
-                # Por último con índex = 2 entra un proceso de 20 y pregunta si particiones[2] está vacía, lo que sería falso, y se marca ese proceso como "Suspendido", a pesar de que podría haber entrado en particiones[0]
-                # Podríamos usar el for _ in memoria_principal.particiones y usar una variable particion que usemos para realizar el control de los procesos
-                if particiones[index].proceso is None:
-                    tamaño = proceso.tamaño
-                    if tamaño <= 60:
-                        asignar(proceso, particiones[0])
-                    elif tamaño <= 120:
-                        asignar(proceso, particiones[1])
-                    else:
-                        asignar(proceso, particiones[2])
-                else:
-                    proceso.estado = "Suspendido"
-
-                cola_listos.append(proceso)
-                index += 1
-
+            cola_listos.append(proceso)
 
 def run(cola_nuevos: list[Proceso]):
     print("-------------- SIMULADOR -------------- (Fix me!)")
@@ -187,7 +167,6 @@ def run(cola_nuevos: list[Proceso]):
 
     while True:
         asignacion_a_memoria(cola_nuevos, cola_listos, memoria_principal, clock)
-        # mostrar_estado(cola_nuevos, cola_listos)
 
         # Round-Robin:
         if CPU_LIBRE:
