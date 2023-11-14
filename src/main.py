@@ -25,7 +25,7 @@ def validar_proceso(answers, current):
 
 def validar_carga(answers, current):
     try:
-        if int(current) >= 5 and int(current) <= 10:
+        if int(current) <= 10:
             return True
     except:
         raise errors.ValidationError(
@@ -120,7 +120,7 @@ def main() -> None:
                             [
                                 inquirer.Text(
                                     name="numero_procesos",
-                                    message="Ingrese el número de procesos que desea cargar (min.5, max.10)",
+                                    message="Ingrese el número de procesos que desea cargar (max.10)",
                                     validate=validar_carga,
                                 )
                             ]

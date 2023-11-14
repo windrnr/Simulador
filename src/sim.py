@@ -1,4 +1,3 @@
-from sys import exception
 from tabulate import tabulate
 from reader import read_data
 
@@ -91,7 +90,15 @@ def generar_desde_archivo(fuente, tamaño: int) -> list[Proceso]:
     return resultado
 
 
-def tabla(title: str, data: list[Proceso], headers: list) -> None:
+def tabla(title: str, data: list[Proceso], headers: list):
+    # """
+    # Imprime por pantalla una tabla con los procesos dentro de una lista.
+    # """
+    # outer = []
+    # for proceso in data:
+    #     outer.append(proceso.return_list_of_data())
+
+    # return tabulate(outer, headers, tablefmt="fancy_outline", stralign="center")
     """
     Imprime por pantalla una tabla con los procesos dentro de una lista.
     """
@@ -105,18 +112,47 @@ def tabla(title: str, data: list[Proceso], headers: list) -> None:
     )
 
 
-def mostrar_estado(cola_nuevos: list[Proceso], cola_listos: list[Proceso], clock: int):
+def mostrar_estado(cola_nuevos: list[Proceso], cola_listos: list[Proceso], cola_finalizados: list[Proceso], clock: int):
+    # print("[!] - En el tiempo de clock:", clock)
+
+    # tabla_nuevos = tabla(
+    #     cola_nuevos,
+    #     ["PID", "TAM(KB)", "TA", "TI", "ESTADO"],
+    # )
+    # tabla_listos = tabla(
+    #     cola_listos,
+    #     ["PID", "TAM(KB)", "TA", "TI", "ESTADO"],
+    # )
+
+    # max_filas = max(len(tabla_nuevos), len(tabla_listos))
+
+    # tabla_nuevos += [["", ""]] * (max_filas- len(tabla_nuevos))
+    # tabla_listos += [["", ""]] * (max_filas- len(tabla_listos))
+    
+    # tabla_nuevos_lineas = tabla_nuevos.split('\n')
+    # tabla_listos_linea = tabla_listos.split('\n')
+
+    # for linea1, linea2 in zip(tabla_nuevos_lineas, tabla_listos_linea):
+    #     print(f"{linea1}\t{linea2}")
     print("[!] - En el tiempo de clock:", clock)
     tabla(
         "->> Carga de trabajo - Cola de Nuevos:",
         cola_nuevos,
         ["PID", "TAM(KB)", "TA", "TI", "ESTADO"],
     )
+    print("----------------------------------------------------------------------")
     tabla(
         "->> Carga de trabajo - Cola de Listos:",
         cola_listos,
         ["PID", "TAM(KB)", "TA", "TI", "ESTADO"],
     )
+    print("----------------------------------------------------------------------")
+    tabla(
+            "->> Procesos Finalizados:",
+        cola_finalizados,
+        ["PID", "TAM(KB)", "TA", "TI", "ESTADO"],
+    )
+    print("----------------------------------------------------------------------")
 
 
 def asignar(proceso: Proceso, particion: Particion):
@@ -142,7 +178,8 @@ def asignacion_a_memoria(
                     
             if proceso.particion is None:
                 proceso.estado = "Suspendido"
-
+                # cola_suspendidos.append(proceso)
+            # else:
             cola_listos.append(proceso)
 
 def run(cola_nuevos: list[Proceso]):
@@ -153,13 +190,16 @@ def run(cola_nuevos: list[Proceso]):
     clock = 0
     quantum = 2
     cola_listos: list[Proceso] = []
+    # cola_suspendidos: list[Proceso] = []
+    cola_finalizados: list[Proceso] = []
+    
     CPU_LIBRE = True
     tabla(
         "[ϴ] Carga de trabajo que ingresa al simulador (Cola de Nuevos):",
         cola_nuevos,
         ["PID", "TAM(KB)", "TA", "TI", "ESTADO"],
     )
-    print("")
+    print("\n")
 
 
     while clock != cola_nuevos[0].tiempo_arribo:
@@ -172,59 +212,69 @@ def run(cola_nuevos: list[Proceso]):
         if CPU_LIBRE:
             quantum = 2
 
-        mostrar_estado(cola_nuevos, cola_listos, clock)
+        mostrar_estado(cola_nuevos, cola_listos, cola_finalizados, clock)
         input("[!] Ingrese Enter para continuar al siguiente tiempo de clock:")
-        clock += 1
-
-        proceso = cola_listos.pop(0)
-
+        print(f"ACA! --->> {quantum}")
+        
+        # Acá! puede haber un error cuando queres ingresar a un índice dentro de una cola vacía
+        proceso = cola_listos[0]
         proceso.estado = "Ejecutando"
+        clock += 1
         proceso.tiempo_irrupcion -= 1
+        CPU_LIBRE = False
+
+        # mostrar_estado(cola_nuevos, cola_listos, clock)
+        # input("[!] Ingrese Enter para continuar al siguiente tiempo de clock:")
+        # print(f"ACA! --->> {quantum}")
+
+
         if proceso.tiempo_irrupcion == 0:
             proceso.estado = "Finalizado"
-            # DEBUG
-            # print("Finalizado:")
-            # print(proceso.return_list_of_data())
-            # DEBUG
+
             if proceso.particion is not None:
                 proceso.particion.proceso = None
+
+            cola_finalizados.append(proceso)
+            cola_listos.pop(0)
             CPU_LIBRE = True
 
             if len(cola_listos) == 0 and len(cola_nuevos) == 0:
-                # Salida
                 break
         else:
             quantum -= 1
-            # mostrar_estado(cola_nuevos, cola_listos)
-            # input("Ingrese enter para continuar al siguiente tiempo de clock")
+            
             if quantum != 0:
                 continue
 
+            if len(cola_listos) != 1:
+                proceso.estado = "Listo"
+                cola_listos.append(cola_listos.pop(0))
+                # cola_listos.append(proceso)
+                CPU_LIBRE = True
+
+        # mostrar_estado(cola_nuevos, cola_listos, clock)
+        # input("[!] Ingrese Enter para continuar al siguiente tiempo de clock:")
+        # print(f"ACA! --->> {quantum}")
+
+        if cola_listos[0].estado == "Suspendido":
+            proceso = cola_listos[0]
+            min_frag = 999
+            min_particion = memoria_principal.particiones[0]
+
+            for particion in memoria_principal.particiones:
+                frag_generada = particion.tamaño - proceso.tamaño
+                if min_frag >= frag_generada and frag_generada >= 0:
+                    min_frag = frag_generada
+                    min_particion = particion
+
+            if (p := min_particion.proceso) is not None:
+                p.estado = "Suspendido"
+                # cola_listos.append(p)
+
             proceso.estado = "Listo"
-            cola_listos.append(proceso)
-            CPU_LIBRE = True
+            min_particion.proceso = proceso
 
-        if cola_listos[0].estado == "Listo":
-            continue
-
-        proceso = cola_listos.pop(0)
-        min_frag = 999
-        min_particion = memoria_principal.particiones[0]
-
-        for particion in memoria_principal.particiones:
-            frag_generada = particion.tamaño - proceso.tamaño
-            if min_frag >= frag_generada and frag_generada >= 0:
-                min_frag = frag_generada
-                min_particion = particion
-
-        if (p := min_particion.proceso) is not None:
-            p.estado = "Suspendido"
-            cola_listos.append(p)
-
-        proceso.estado = "Listo"
-        min_particion.proceso = proceso
 
         continue
 
-    print("estado final")
-    mostrar_estado(cola_nuevos, cola_listos, clock)
+    print("Termino!")
