@@ -24,8 +24,10 @@ class Proceso:
         self.tiempo_arribo: int = data[2]
         self.tiempo_irrupcion: int = data[3]
         self.tiempo_respuesta: int = 0
+        self.tiempo_salida: int = 0
         self.estado = "Nuevo"
         self.particion: Particion | None = None
+        
 
     def return_list_of_data(self) -> list:
         data = []
@@ -96,7 +98,7 @@ def mostrar_estado(
     """
     print(f"[!] - En el tiempo de clock: {clock}\n")
     nombres_columnas = ["PID", "TAM(KB)", "TA", "TI", "ESTADO"]
-    memoria_columnas = ["TAM(KB)", "PID", "TAM(KB)"]
+    memoria_columnas = ["TAM(KB)","FRAG(KB)", "PID", "TAM(KB)"]
 
     header_style = "bold green"
     title_style = "bold"
@@ -114,6 +116,7 @@ def mostrar_estado(
         if particion and particion.proceso is not None:
             tabla_memoria.add_row(
                 str(particion.tamaño),
+                str(particion.frag_interna),
                 str(particion.proceso.pid),
                 str(particion.proceso.tamaño),
             )
@@ -162,7 +165,7 @@ def mostrar_estado(
         for columna in nombres_columnas:
             tabla_finalizados.add_column(columna, justify="center")
         for p in cola_finalizados:
-            p.estado = "Finalizado"
+        #     p.estado = "Finalizado"
             tabla_finalizados.add_row(
                 str(p.pid),
                 str(p.tamaño),
@@ -245,6 +248,9 @@ def run(cola_nuevos: list[Proceso]):
 
         if CPU_LIBRE:
             quantum = 2
+        
+        input("[!] Ingrese Enter para continuar al siguiente tiempo de clock:\n")
+        print(f"[!] - Quantum igual a: {quantum}")
 
         proceso = cola_listos[0]
         proceso.estado = "Ejecutando"
@@ -252,8 +258,6 @@ def run(cola_nuevos: list[Proceso]):
         mostrar_estado(
             cola_nuevos, cola_listos, cola_finalizados, memoria_principal, clock
         )
-        input("[!] Ingrese Enter para continuar al siguiente tiempo de clock:\n")
-        print(f"[!] - Quantum igual a: {quantum}")
 
         clock += 1
         proceso.tiempo_irrupcion -= 1
@@ -278,16 +282,13 @@ def run(cola_nuevos: list[Proceso]):
             if quantum != 0:
                 continue
 
+            # quantum = 2
             if len(cola_listos) != 1:
                 proceso.estado = "Listo"
                 cola_listos.append(cola_listos.pop(0))
                 CPU_LIBRE = True
 
-        # ->>
-        # mostrar_estado(cola_nuevos, cola_listos, cola_finalizados, clock)
-        # input("[!] Ingrese Enter para continuar al siguiente tiempo de clock:\n")
-        # print(f"[!] - Quantum igual a: {quantum}")
-
+        # Cambio de contexto
         if cola_listos[0].estado == "Suspendido":
             proceso = cola_listos[0]
             min_frag = 999
@@ -301,16 +302,30 @@ def run(cola_nuevos: list[Proceso]):
 
             if (p := min_particion.proceso) is not None:
                 p.estado = "Suspendido"
-
+            
             proceso.estado = "Listo"
             min_particion.proceso = proceso
+            min_particion.frag_interna = min_particion.tamaño - proceso.tamaño
 
         continue
 
     mostrar_estado(cola_nuevos, cola_listos, cola_finalizados, memoria_principal, clock)
 
-    print(f"Tiempo total de: {clock}")
+    print(f"Tiempo total de clock: {clock}")
+    
+    headers = ["PID", "T. RESPUESTA", "PORCENTAJE T.RESPUESTA (%)"]
+    tabla_estadistica = Table(
+        title="[ϴ] Tabla estadística del tiempo ocupado por proceso",
+        show_header=True,
+        header_style="bold green",
+        title_style="bold",
+    )
+    for columna in headers:
+        tabla_estadistica.add_column(columna)
     for p in cola_finalizados:
-        print(
-            f"Tiempo de respuesta de {p.pid}: \t {p.tiempo_respuesta}, porcentaje: \t {round((p.tiempo_respuesta/clock)*100, 2)}%"
+        tabla_estadistica.add_row(
+            str(p.pid),
+            str(p.tiempo_respuesta),
+            str(round((p.tiempo_respuesta/clock)*100, 2)),
         )
+    Console().print(tabla_estadistica, "\n")
