@@ -1,4 +1,3 @@
-from tabulate import tabulate
 from reader import read_data
 from rich.console import Console
 from rich.table import Table
@@ -24,6 +23,7 @@ class Proceso:
         self.tamaño: int = data[1]
         self.tiempo_arribo: int = data[2]
         self.tiempo_irrupcion: int = data[3]
+        self.tiempo_respuesta: int = 0
         self.estado = "Nuevo"
         self.particion: Particion | None = None
 
@@ -66,11 +66,11 @@ def tabla(title: str, data: list[Proceso], headers: list):
     Imprime por pantalla una tabla con los procesos dentro de una lista.
     """
     tabla = Table(
-            title = title,
-            show_header=True,
-            header_style="bold green",
-            title_style="bold",
-            )
+        title=title,
+        show_header=True,
+        header_style="bold green",
+        title_style="bold",
+    )
     for columnas in headers:
         tabla.add_column(columnas)
     for p in data:
@@ -81,14 +81,14 @@ def tabla(title: str, data: list[Proceso], headers: list):
             str(p.tiempo_irrupcion),
             p.estado,
         )
-    Console().print(tabla,"\n")
-
+    Console().print(tabla, "\n")
 
 
 def mostrar_estado(
     cola_nuevos: list[Proceso],
     cola_listos: list[Proceso],
     cola_finalizados: list[Proceso],
+    memoria: Memoria,
     clock: int,
 ):
     """
@@ -96,9 +96,27 @@ def mostrar_estado(
     """
     print(f"[!] - En el tiempo de clock: {clock}\n")
     nombres_columnas = ["PID", "TAM(KB)", "TA", "TI", "ESTADO"]
+    memoria_columnas = ["TAM(KB)", "PID", "TAM(KB)"]
 
     header_style = "bold green"
     title_style = "bold"
+
+    tabla_memoria = Table(
+        title="Memoria",
+        show_header=True,
+        header_style="bold blue",
+        title_style=title_style,
+    )
+
+    for columna in memoria_columnas:
+        tabla_memoria.add_column(columna, justify="center")
+    for particion in memoria.particiones:
+        if particion and particion.proceso is not None:
+            tabla_memoria.add_row(
+                str(particion.tamaño),
+                str(particion.proceso.pid),
+                str(particion.proceso.tamaño),
+            )
 
     tabla_nuevos = Table(
         title="Cola de Nuevos",
@@ -106,8 +124,8 @@ def mostrar_estado(
         header_style=header_style,
         title_style=title_style,
     )
-    for columnas in nombres_columnas:
-        tabla_nuevos.add_column(columnas)
+    for columna in nombres_columnas:
+        tabla_nuevos.add_column(columna, justify="center")
     for p in cola_nuevos:
         tabla_nuevos.add_row(
             str(p.pid),
@@ -123,8 +141,8 @@ def mostrar_estado(
         header_style=header_style,
         title_style=title_style,
     )
-    for columnas in nombres_columnas:
-        tabla_listos.add_column(columnas)
+    for columna in nombres_columnas:
+        tabla_listos.add_column(columna, justify="center")
     for p in cola_listos:
         tabla_listos.add_row(
             str(p.pid),
@@ -141,9 +159,10 @@ def mostrar_estado(
             header_style=header_style,
             title_style=title_style,
         )
-        for columnas in nombres_columnas:
-            tabla_finalizados.add_column(columnas)
+        for columna in nombres_columnas:
+            tabla_finalizados.add_column(columna, justify="center")
         for p in cola_finalizados:
+            p.estado = "Finalizado"
             tabla_finalizados.add_row(
                 str(p.pid),
                 str(p.tamaño),
@@ -152,9 +171,23 @@ def mostrar_estado(
                 p.estado,
             )
 
-        Console().print(Columns([tabla_nuevos, "\t", tabla_listos, "\t", tabla_finalizados]))
+        Console().print(
+            Columns(
+                [
+                    tabla_memoria,
+                    "\t",
+                    tabla_nuevos,
+                    "\t",
+                    tabla_listos,
+                    "\t",
+                    tabla_finalizados,
+                ]
+            )
+        )
     else:
-        Console().print(Columns([tabla_nuevos, "\t", tabla_listos]))
+        Console().print(
+            Columns([tabla_memoria, "\t", tabla_nuevos, "\t", tabla_listos])
+        )
 
 
 def asignar(proceso: Proceso, particion: Particion):
@@ -184,7 +217,7 @@ def asignacion_a_memoria(
 
         if proceso.particion is None:
             proceso.estado = "Suspendido"
-        
+
         cola_listos.append(proceso)
 
 
@@ -213,14 +246,18 @@ def run(cola_nuevos: list[Proceso]):
         if CPU_LIBRE:
             quantum = 2
 
-        mostrar_estado(cola_nuevos, cola_listos, cola_finalizados, clock)
+        proceso = cola_listos[0]
+        proceso.estado = "Ejecutando"
+
+        mostrar_estado(
+            cola_nuevos, cola_listos, cola_finalizados, memoria_principal, clock
+        )
         input("[!] Ingrese Enter para continuar al siguiente tiempo de clock:\n")
         print(f"[!] - Quantum igual a: {quantum}")
 
-        proceso = cola_listos[0]
-        proceso.estado = "Ejecutando"
         clock += 1
         proceso.tiempo_irrupcion -= 1
+        proceso.tiempo_respuesta += 1
         CPU_LIBRE = False
 
         if proceso.tiempo_irrupcion == 0:
@@ -246,6 +283,11 @@ def run(cola_nuevos: list[Proceso]):
                 cola_listos.append(cola_listos.pop(0))
                 CPU_LIBRE = True
 
+        # ->>
+        # mostrar_estado(cola_nuevos, cola_listos, cola_finalizados, clock)
+        # input("[!] Ingrese Enter para continuar al siguiente tiempo de clock:\n")
+        # print(f"[!] - Quantum igual a: {quantum}")
+
         if cola_listos[0].estado == "Suspendido":
             proceso = cola_listos[0]
             min_frag = 999
@@ -265,4 +307,10 @@ def run(cola_nuevos: list[Proceso]):
 
         continue
 
-    print("Termino!")
+    mostrar_estado(cola_nuevos, cola_listos, cola_finalizados, memoria_principal, clock)
+
+    print(f"Tiempo total de: {clock}")
+    for p in cola_finalizados:
+        print(
+            f"Tiempo de respuesta de {p.pid}: \t {p.tiempo_respuesta}, porcentaje: \t {round((p.tiempo_respuesta/clock)*100, 2)}%"
+        )
