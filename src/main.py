@@ -3,6 +3,7 @@ from inquirer import errors
 from pathlib import Path, PurePath
 from sim import Proceso, run, generar_desde_archivo
 
+
 def build(file_path):
     cola_nuevos = generar_desde_archivo(file_path, 10)
     run(cola_nuevos)
@@ -38,7 +39,8 @@ def validar_path(answers, current):
 
     if not Path.exists(file_path):
         raise errors.ValidationError(
-            "", reason=f"Ha ocurrido un error abriendo '{file_path}', no existe o no ha podido ser encontrado."
+            "",
+            reason=f"Ha ocurrido un error abriendo '{file_path}', no existe o no ha podido ser encontrado.",
         )
 
     if Path.is_dir(file_path):
