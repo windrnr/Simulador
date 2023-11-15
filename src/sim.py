@@ -134,7 +134,27 @@ def mostrar_estado(
             p.estado,
         )
 
-    Console().print(Columns([tabla_nuevos, "\t", tabla_listos]))
+    if len(cola_finalizados) != 0:
+        tabla_finalizados = Table(
+            title="Procesos Finalizados",
+            show_header=True,
+            header_style=header_style,
+            title_style=title_style,
+        )
+        for columnas in nombres_columnas:
+            tabla_finalizados.add_column(columnas)
+        for p in cola_finalizados:
+            tabla_finalizados.add_row(
+                str(p.pid),
+                str(p.tamaño),
+                str(p.tiempo_arribo),
+                str(p.tiempo_irrupcion),
+                p.estado,
+            )
+
+        Console().print(Columns([tabla_nuevos, "\t", tabla_listos, "\t", tabla_finalizados]))
+    else:
+        Console().print(Columns([tabla_nuevos, "\t", tabla_listos]))
 
 
 def asignar(proceso: Proceso, particion: Particion):
