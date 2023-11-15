@@ -4,9 +4,9 @@ from pathlib import Path, PurePath
 from sim import Proceso, run, generar_desde_archivo
 
 
-def build(file_path):
+def build(file_path, FULL_RUN):
     cola_nuevos = generar_desde_archivo(file_path, 10)
-    run(cola_nuevos)
+    run(cola_nuevos, FULL_RUN)
 
 
 def clear_screen():
@@ -57,6 +57,12 @@ def validar_path(answers, current):
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument(
+        "-f",
+        "--full-run",
+        action="store_true",
+        help="Habilita a mostrar la información en cada tiempo del clock.",
+    )
+    parser.add_argument(
         "file_path",
         type=Path,
         nargs="?",
@@ -75,7 +81,7 @@ def main() -> None:
 
     try:
         if args.file_path is not None:
-            build(args.file_path)
+            build(args.file_path, args.full_run)
         else:
             respuestas = inquirer.prompt(preguntas)
             if respuestas is not None:
@@ -94,7 +100,7 @@ def main() -> None:
                         )
                         if respuesta is not None:
                             file_path = Path(PurePath(respuesta["path"]))
-                            build(file_path)
+                            build(file_path, args.full_run)
                     else:
                         preguntas = [
                             inquirer.Text(
@@ -142,7 +148,7 @@ def main() -> None:
                                     cola_nuevos.append(Proceso(data))
 
                             clear_screen()
-                            run(cola_nuevos)
+                            run(cola_nuevos, args.full_run)
 
     except KeyboardInterrupt:
         print("\nSimulador apagándose..")

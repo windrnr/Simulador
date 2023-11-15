@@ -23,11 +23,11 @@ class Proceso:
         self.tamaño: int = data[1]
         self.tiempo_arribo: int = data[2]
         self.tiempo_irrupcion: int = data[3]
-        self.tiempo_respuesta: int = 0
-        self.tiempo_salida: int = 0
+        # Tiempo total en que el proceso está en estado Listo
+        self.tiempo_espera:int = 0
+        self.instante_salida:int = 0
         self.estado = "Nuevo"
         self.particion: Particion | None = None
-        
 
     def return_list_of_data(self) -> list:
         data = []
@@ -86,21 +86,16 @@ def tabla(title: str, data: list[Proceso], headers: list):
     Console().print(tabla, "\n")
 
 
-def mostrar_estado(
+def mostrar_final(
     cola_nuevos: list[Proceso],
     cola_listos: list[Proceso],
     cola_finalizados: list[Proceso],
     memoria: Memoria,
     clock: int,
 ):
-    """
-    Imprime por pantalla varias tablas con la información de los procesos de cada cola.
-    """
-    print(f"[!] - En el tiempo de clock: {clock}\n")
-    nombres_columnas = ["PID", "TAM(KB)", "TA", "TI", "ESTADO"]
-    memoria_columnas = ["TAM(KB)","FRAG(KB)", "PID", "TAM(KB)"]
-
-    header_style = "bold green"
+    cola_columnas = ["PID", "TAM(KB)", "TA", "TI", "ESTADO"]
+    memoria_columnas = ["DIRECCIÓN", "TAM(KB)", "FRAG(KB)", "PID", "TAM(KB)"]
+    estadistica_columnas = ["PID", "T. RESPUESTA", "T. ESPERA", "T.RETORNO","T.RESPUESTA(%)"]
     title_style = "bold"
 
     tabla_memoria = Table(
@@ -115,6 +110,7 @@ def mostrar_estado(
     for particion in memoria.particiones:
         if particion and particion.proceso is not None:
             tabla_memoria.add_row(
+                str(hex(id(particion))),
                 str(particion.tamaño),
                 str(particion.frag_interna),
                 str(particion.proceso.pid),
@@ -124,7 +120,129 @@ def mostrar_estado(
     tabla_nuevos = Table(
         title="Cola de Nuevos",
         show_header=True,
-        header_style=header_style,
+        header_style="bold yellow",
+        title_style=title_style,
+    )
+    for columna in cola_columnas:
+        tabla_nuevos.add_column(columna, justify="center")
+    for p in cola_nuevos:
+        tabla_nuevos.add_row(
+            str(p.pid),
+            str(p.tamaño),
+            str(p.tiempo_arribo),
+            str(p.tiempo_irrupcion),
+            p.estado,
+        )
+
+    tabla_listos = Table(
+        title="Cola de Listos",
+        show_header=True,
+        header_style="bold cyan",
+        title_style=title_style,
+    )
+    for columna in cola_columnas:
+        tabla_listos.add_column(columna, justify="center")
+    for p in cola_listos:
+        tabla_listos.add_row(
+            str(p.pid),
+            str(p.tamaño),
+            str(p.tiempo_arribo),
+            str(p.tiempo_irrupcion),
+            p.estado,
+        )
+
+    tabla_finalizados = Table(
+        title="Procesos Finalizados",
+        show_header=True,
+        header_style="bold green",
+        title_style=title_style,
+    )
+    for columna in cola_columnas:
+        tabla_finalizados.add_column(columna, justify="center")
+    for p in cola_finalizados:
+        tabla_finalizados.add_row(
+            str(p.pid),
+            str(p.tamaño),
+            str(p.tiempo_arribo),
+            str(p.tiempo_irrupcion),
+            p.estado,
+        )
+    tabla_estadistica = Table(
+        title="Tabla estadística del tiempo ocupado por proceso",
+        show_header=True,
+        header_style="bold green",
+        title_style="bold",
+    )
+    for columna in estadistica_columnas:
+        tabla_estadistica.add_column(columna, justify="center")
+    for p in cola_finalizados:
+
+        t_respuesta = p.instante_salida - p.tiempo_arribo 
+        t_retorno = p.tiempo_irrupcion + p.tiempo_espera
+        t_espera = p.tiempo_espera
+
+        tabla_estadistica.add_row(
+            str(p.pid),
+            str(t_respuesta),
+            str(t_espera),
+            str(t_retorno),
+            str(round((t_respuesta/ len(cola_finalizados)), 2)),
+            str(round((t_retorno/ len(cola_finalizados)), 2)),
+            # str(round((p.tiempo_respuesta / clock) * 100, 2)),
+        )
+
+    Console().print(
+        Columns(
+            [
+                tabla_estadistica,
+                # "\t",
+                # tabla_memoria,
+                # "\t",
+                # tabla_finalizados,
+            ]
+        )
+    )
+
+
+def mostrar_estado(
+    cola_nuevos: list[Proceso],
+    cola_listos: list[Proceso],
+    cola_finalizados: list[Proceso],
+    memoria: Memoria,
+    clock: int,
+):
+    """
+    Imprime por pantalla varias tablas con la información de los procesos de cada cola.
+    """
+    print(f"[!] - En el tiempo de clock: {clock}\n")
+    nombres_columnas = ["PID", "TAM(KB)", "TA", "TI", "ESTADO"]
+    memoria_columnas = ["DIRECCIÓN", "TAM(KB)", "FRAG(KB)", "PID", "TAM(KB)"]
+
+    title_style = "bold"
+
+    tabla_memoria = Table(
+        title="Memoria",
+        show_header=True,
+        header_style="bold blue",
+        title_style=title_style,
+    )
+
+    for columna in memoria_columnas:
+        tabla_memoria.add_column(columna, justify="center")
+    for particion in memoria.particiones:
+        if particion and particion.proceso is not None:
+            tabla_memoria.add_row(
+                str(hex(id(particion))),
+                str(particion.tamaño),
+                str(particion.frag_interna),
+                str(particion.proceso.pid),
+                str(particion.proceso.tamaño),
+            )
+
+    tabla_nuevos = Table(
+        title="Cola de Nuevos",
+        show_header=True,
+        header_style="bold yellow",
         title_style=title_style,
     )
     for columna in nombres_columnas:
@@ -141,7 +259,7 @@ def mostrar_estado(
     tabla_listos = Table(
         title="Cola de Listos",
         show_header=True,
-        header_style=header_style,
+        header_style="bold cyan",
         title_style=title_style,
     )
     for columna in nombres_columnas:
@@ -159,13 +277,12 @@ def mostrar_estado(
         tabla_finalizados = Table(
             title="Procesos Finalizados",
             show_header=True,
-            header_style=header_style,
+            header_style="bold green",
             title_style=title_style,
         )
         for columna in nombres_columnas:
             tabla_finalizados.add_column(columna, justify="center")
         for p in cola_finalizados:
-        #     p.estado = "Finalizado"
             tabla_finalizados.add_row(
                 str(p.pid),
                 str(p.tamaño),
@@ -224,7 +341,7 @@ def asignacion_a_memoria(
         cola_listos.append(proceso)
 
 
-def run(cola_nuevos: list[Proceso]):
+def run(cola_nuevos: list[Proceso], FULL_RUN):
     memoria_principal = Memoria(
         [Particion(100), Particion(60), Particion(120), Particion(250)]
     )
@@ -248,27 +365,39 @@ def run(cola_nuevos: list[Proceso]):
 
         if CPU_LIBRE:
             quantum = 2
-        
-        input("[!] Ingrese Enter para continuar al siguiente tiempo de clock:\n")
-        print(f"[!] - Quantum igual a: {quantum}")
+
+        if FULL_RUN:
+            input("[!] Ingrese Enter para continuar al siguiente tiempo de clock:\n")
+            print(f"[!] - Quantum igual a: {quantum}")
 
         proceso = cola_listos[0]
         proceso.estado = "Ejecutando"
 
-        mostrar_estado(
-            cola_nuevos, cola_listos, cola_finalizados, memoria_principal, clock
-        )
+        if FULL_RUN:
+            mostrar_estado(
+                cola_nuevos, cola_listos, cola_finalizados, memoria_principal, clock
+            )
 
         clock += 1
         proceso.tiempo_irrupcion -= 1
-        proceso.tiempo_respuesta += 1
+
+        # EXPERIMENTAL
+
+        for p in cola_listos[1:]:
+            if p.estado == "Listo":
+                p.tiempo_espera += 1
+
+
+
         CPU_LIBRE = False
 
         if proceso.tiempo_irrupcion == 0:
             proceso.estado = "Finalizado"
+            proceso.instante_salida = clock
 
             if proceso.particion is not None:
                 proceso.particion.proceso = None
+                proceso.particion = None
 
             cola_finalizados.append(proceso)
             cola_listos.pop(0)
@@ -282,11 +411,18 @@ def run(cola_nuevos: list[Proceso]):
             if quantum != 0:
                 continue
 
-            # quantum = 2
             if len(cola_listos) != 1:
                 proceso.estado = "Listo"
                 cola_listos.append(cola_listos.pop(0))
                 CPU_LIBRE = True
+
+                # REVISAR QUÉ ERA LO QUE QUERÍA VER EL PROFE. ACÁ NO ME GUSTA PORQUE MUESTRA EL QUANTO EN 0. YO QUIERO QUE SE MUESTRE CADA VEZ QUE HAY UN CAMBIO DE CONTEXTO
+                # if not FULL_RUN:
+                #     input("[!] Ingrese Enter para continuar al siguiente estado.")
+                #     print(f"[!] - Quantum igual a: {quantum}")
+                #     mostrar_estado(
+                #         cola_nuevos, cola_listos, cola_finalizados, memoria_principal, clock
+                #     )
 
         # Cambio de contexto
         if cola_listos[0].estado == "Suspendido":
@@ -302,30 +438,22 @@ def run(cola_nuevos: list[Proceso]):
 
             if (p := min_particion.proceso) is not None:
                 p.estado = "Suspendido"
-            
+
             proceso.estado = "Listo"
             min_particion.proceso = proceso
             min_particion.frag_interna = min_particion.tamaño - proceso.tamaño
+
+            # REVISAR QUÉ ERA LO QUE QUERÍA VER EL PROFE. ACÁ NO ME GUSTA PORQUE MUESTRA EL QUANTO EN 0. YO QUIERO QUE SE MUESTRE CADA VEZ QUE HAY UN CAMBIO DE CONTEXTO
+            # if not FULL_RUN:
+            #     input("[!] Ingrese Enter para continuar al siguiente estado.")
+            #     print(f"[!] - Quantum igual a: {quantum}")
+            #     mostrar_estado(
+            #         cola_nuevos, cola_listos, cola_finalizados, memoria_principal, clock
+            #     )
 
         continue
 
     mostrar_estado(cola_nuevos, cola_listos, cola_finalizados, memoria_principal, clock)
 
-    print(f"Tiempo total de clock: {clock}")
-    
-    headers = ["PID", "T. RESPUESTA", "PORCENTAJE T.RESPUESTA (%)"]
-    tabla_estadistica = Table(
-        title="[ϴ] Tabla estadística del tiempo ocupado por proceso",
-        show_header=True,
-        header_style="bold green",
-        title_style="bold",
-    )
-    for columna in headers:
-        tabla_estadistica.add_column(columna)
-    for p in cola_finalizados:
-        tabla_estadistica.add_row(
-            str(p.pid),
-            str(p.tiempo_respuesta),
-            str(round((p.tiempo_respuesta/clock)*100, 2)),
-        )
-    Console().print(tabla_estadistica, "\n")
+    print(f"El simulador completó su tarea en {clock} tiempos de clock.")
+    mostrar_final(cola_nuevos, cola_listos, cola_finalizados, memoria_principal, clock)
