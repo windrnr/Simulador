@@ -95,15 +95,13 @@ def mostrar_estadisticas(
         "T.RESPUESTA",
         "T.ESPERA",
         "T.RETORNO",
-
     ]
 
-    promedios_columnas = [ 
+    promedios_columnas = [
         "T.RESPUESTA(x̄)",
         "T.ESPERA(x̄)",
         "T.RETORNO(x̄)",
     ]
-    
 
     tabla_estadistica = Table(
         title="Tiempos de cada proceso",
@@ -111,7 +109,6 @@ def mostrar_estadisticas(
         header_style="bold green",
         title_style="bold",
     )
-    
 
     for columna in estadistica_columnas:
         tabla_estadistica.add_column(columna, justify="center")
@@ -135,33 +132,24 @@ def mostrar_estadisticas(
     )
 
     sum_t_respuesta = 0
-    sum_t_retorno   = 0
-    sum_t_espera    = 0
-    
+    sum_t_retorno = 0
+    sum_t_espera = 0
+
     for columna in promedios_columnas:
         tabla_promedios.add_column(columna, justify="center")
     for p in cola_finalizados:
-        sum_t_respuesta += (p.instante_salida - p.tiempo_arribo)
+        sum_t_respuesta += p.instante_salida - p.tiempo_arribo
         # Que vivo que soy si a este punto de la ejecución el tiempo de irrupción de ese proceso es 0.
-        sum_t_retorno   += (p.resguardo_tiempo_irrupcion + p.tiempo_espera)
-        sum_t_espera    += (p.tiempo_espera)
-
+        sum_t_retorno += p.resguardo_tiempo_irrupcion + p.tiempo_espera
+        sum_t_espera += p.tiempo_espera
 
     tabla_promedios.add_row(
-        str(round((sum_t_respuesta  / len(cola_finalizados)), 2)),
-        str(round((sum_t_espera     / len(cola_finalizados)), 2)),
-        str(round((sum_t_retorno    / len(cola_finalizados)), 2)),
+        str(round((sum_t_respuesta / len(cola_finalizados)), 2)),
+        str(round((sum_t_espera / len(cola_finalizados)), 2)),
+        str(round((sum_t_retorno / len(cola_finalizados)), 2)),
     )
 
-    Console().print(
-        Columns(
-            [
-                tabla_estadistica,
-                "\t",
-                tabla_promedios
-            ]
-        )
-    )
+    Console().print(Columns([tabla_estadistica, "\t", tabla_promedios]))
 
 
 def mostrar_estado(
@@ -251,8 +239,18 @@ def mostrar_estado(
                 p.estado,
             )
 
-        Console().print (
-            Columns([tabla_memoria, "\t", tabla_nuevos, "\t", tabla_listos, "\t", tabla_finalizados])
+        Console().print(
+            Columns(
+                [
+                    tabla_memoria,
+                    "\t",
+                    tabla_nuevos,
+                    "\t",
+                    tabla_listos,
+                    "\t",
+                    tabla_finalizados,
+                ]
+            )
         )
     else:
         Console().print(

@@ -93,7 +93,7 @@ def Run(cola_nuevos: list[Proceso], FULL_RUN):
             if proceso.particion is not None:
                 proceso.particion.proceso = None
                 proceso.particion = None
-            
+
             # Genero una copia porque estabamos teniendo conflictos con comportamientos indefinidos en ciertas partes.
             proceso = deepcopy(proceso)
             cola_finalizados.append(proceso)
@@ -109,7 +109,6 @@ def Run(cola_nuevos: list[Proceso], FULL_RUN):
                     cola_nuevos, cola_listos, cola_finalizados, memoria_principal, clock
                 )
 
-                
             if len(cola_listos) == 0 and len(cola_nuevos) == 0:
                 break
         else:
@@ -122,8 +121,6 @@ def Run(cola_nuevos: list[Proceso], FULL_RUN):
                 proceso.estado = "Listo"
                 cola_listos.append(cola_listos.pop(0))
                 CPU_LIBRE = True
-
-                
 
         # Cambio de contexto
         if cola_listos[0].estado == "Suspendido":
@@ -143,16 +140,16 @@ def Run(cola_nuevos: list[Proceso], FULL_RUN):
             proceso.estado = "Listo"
             min_particion.proceso = proceso
             min_particion.frag_interna = min_particion.tamaño - proceso.tamaño
-            
+
             if not FULL_RUN:
                 input("[!] Ingrese Enter para continuar al siguiente estado.")
                 print(f"[!] - Quantum igual a: {quantum}")
-                print(f"[!] - {proceso.pid} pasa a \'Listo\'")
+                print(f"[!] - {proceso.pid} pasa a 'Listo'")
                 mostrar_estado(
                     cola_nuevos, cola_listos, cola_finalizados, memoria_principal, clock
                 )
 
         continue
 
-    print(f"El simulador completó su tarea en {clock} tiempos de clock.")
+    print(f"El simulador completó su tarea en {clock} tiempos de clock.\n")
     mostrar_estadisticas(cola_finalizados)
