@@ -41,7 +41,7 @@ def asignacion_a_memoria(
         cola_listos.append(proceso)
 
 
-def Run(cola_nuevos: list[Proceso], FULL_RUN):
+def Run(cola_nuevos: list[Proceso], FULL_RUN, ININTERRUMPIDO):
     memoria_principal = Memoria(
         [Particion(100), Particion(60), Particion(120), Particion(250)]
     )
@@ -62,20 +62,27 @@ def Run(cola_nuevos: list[Proceso], FULL_RUN):
 
     while True:
         asignacion_a_memoria(cola_nuevos, cola_listos, memoria_principal, clock)
-
+        
         if CPU_LIBRE:
             quantum = 2
 
         proceso = cola_listos[0]
         proceso.estado = "Ejecutando"
 
-        if FULL_RUN:
+        if FULL_RUN and not ININTERRUMPIDO:
             input("[!] Ingrese Enter para continuar al siguiente tiempo de clock:\n")
+            print(f"[!] - En el tiempo de clock: {clock}")
             print(f"[!] - Quantum igual a: {quantum}")
-
             mostrar_estado(
-                cola_nuevos, cola_listos, cola_finalizados, memoria_principal, clock
+                cola_nuevos, cola_listos, cola_finalizados, memoria_principal 
             )
+        elif FULL_RUN and ININTERRUMPIDO:
+            print(f"[!] - En el tiempo de clock: {clock}")
+            print(f"[!] - Quantum igual a: {quantum}")
+            mostrar_estado(
+                cola_nuevos, cola_listos, cola_finalizados, memoria_principal 
+            )
+
 
         clock += 1
         proceso.tiempo_irrupcion -= 1
@@ -101,13 +108,22 @@ def Run(cola_nuevos: list[Proceso], FULL_RUN):
             # Retiro al proceso de la cola de listos.
             cola_listos.pop(0)
 
-            if not FULL_RUN:
+            if not FULL_RUN and not ININTERRUMPIDO:
                 input("[!] Ingrese Enter para continuar al siguiente estado.")
+                print(f"[!] - En el tiempo de clock: {clock}")
                 print(f"[!] - Quantum igual a: {quantum}")
                 print(f"[!] - Finaliza el proceso: {proceso.pid}")
                 mostrar_estado(
-                    cola_nuevos, cola_listos, cola_finalizados, memoria_principal, clock
+                    cola_nuevos, cola_listos, cola_finalizados, memoria_principal
                 )
+            elif not FULL_RUN and ININTERRUMPIDO:
+                print(f"[!] - En el tiempo de clock: {clock}")
+                print(f"[!] - Quantum igual a: {quantum}")
+                print(f"[!] - Finaliza el proceso: {proceso.pid}")
+                mostrar_estado(
+                    cola_nuevos, cola_listos, cola_finalizados, memoria_principal
+                )
+
 
             if len(cola_listos) == 0 and len(cola_nuevos) == 0:
                 break
@@ -121,6 +137,8 @@ def Run(cola_nuevos: list[Proceso], FULL_RUN):
                 proceso.estado = "Listo"
                 cola_listos.append(cola_listos.pop(0))
                 CPU_LIBRE = True
+            else:
+                quantum = 2
 
         # Cambio de contexto
         if cola_listos[0].estado == "Suspendido":
@@ -141,12 +159,20 @@ def Run(cola_nuevos: list[Proceso], FULL_RUN):
             min_particion.proceso = proceso
             min_particion.frag_interna = min_particion.tamaño - proceso.tamaño
 
-            if not FULL_RUN:
+            if not FULL_RUN and not ININTERRUMPIDO:
                 input("[!] Ingrese Enter para continuar al siguiente estado.")
+                print(f"[!] - En el tiempo de clock: {clock}")
                 print(f"[!] - Quantum igual a: {quantum}")
                 print(f"[!] - {proceso.pid} pasa a 'Listo'")
                 mostrar_estado(
-                    cola_nuevos, cola_listos, cola_finalizados, memoria_principal, clock
+                    cola_nuevos, cola_listos, cola_finalizados, memoria_principal 
+                )
+            elif not FULL_RUN and ININTERRUMPIDO:
+                print(f"[!] - En el tiempo de clock: {clock}")
+                print(f"[!] - Quantum igual a: {quantum}")
+                print(f"[!] - {proceso.pid} pasa a 'Listo'")
+                mostrar_estado(
+                    cola_nuevos, cola_listos, cola_finalizados, memoria_principal 
                 )
 
         continue

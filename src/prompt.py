@@ -50,7 +50,7 @@ def validar_path(answers, current):
     return True
 
 
-def Prompt(FULL_RUN):
+def Prompt(FULL_RUN, ININTERRUMPIDO):
     preguntas = [
         inquirer.List(
             name="opción",
@@ -76,7 +76,7 @@ def Prompt(FULL_RUN):
                 if respuesta is not None:
                     file_path = Path(PurePath(respuesta["path"]))
                     cola_nuevos = generar_desde_archivo(file_path, 10)
-                    Run(cola_nuevos, FULL_RUN)
+                    Run(cola_nuevos, FULL_RUN, ININTERRUMPIDO)
             else:
                 preguntas = [
                     inquirer.Text(
@@ -124,4 +124,4 @@ def Prompt(FULL_RUN):
                             cola_nuevos.append(Proceso(data))
 
                     clear_screen()
-                    Run(cola_nuevos, FULL_RUN)
+                    Run(cola_nuevos, FULL_RUN, ININTERRUMPIDO)

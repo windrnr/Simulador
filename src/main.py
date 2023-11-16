@@ -11,7 +11,13 @@ def main() -> None:
         "-f",
         "--full-run",
         action="store_true",
-        help="Habilita a mostrar la información en cada tiempo del clock.",
+        help="Muestra la información en cada clock, esperando al usuario.",
+    )
+    parser.add_argument(
+        "-i",
+        "--ininterrumpido",
+        action="store_true",
+        help="Muestra la información sin esperar al usuario.",
     )
     parser.add_argument(
         "file_path",
@@ -25,9 +31,9 @@ def main() -> None:
     try:
         if args.file_path is not None:
             cola_nuevos = generar_desde_archivo(args.file_path, 10)
-            Run(cola_nuevos, args.full_run)
+            Run(cola_nuevos, args.full_run, args.ininterrumpido)
         else:
-            Prompt(args.full_run)
+            Prompt(args.full_run, args.ininterrumpido)
 
     except KeyboardInterrupt:
         print("\nSimulador apagándose..")

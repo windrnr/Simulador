@@ -157,12 +157,10 @@ def mostrar_estado(
     cola_listos: list[Proceso],
     cola_finalizados: list[Proceso],
     memoria: Memoria,
-    clock: int,
 ):
     """
     Imprime por pantalla varias tablas con la información de los procesos de cada cola.
     """
-    print(f"[!] - En el tiempo de clock: {clock}\n")
     nombres_columnas = ["PID", "TAM(KB)", "TA", "TI", "ESTADO"]
     memoria_columnas = ["DIRECCIÓN", "TAM(KB)", "FRAG(KB)", "PID", "TAM(KB)"]
 
