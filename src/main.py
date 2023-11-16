@@ -4,6 +4,7 @@ from prompt import Prompt
 from sim import Run
 from utils import generar_desde_archivo
 
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument(

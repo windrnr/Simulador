@@ -4,6 +4,7 @@ from pathlib import Path, PurePath
 from sim import Run
 from utils import Proceso, generar_desde_archivo
 
+
 def clear_screen():
     clear = lambda: os.system("tput reset")
     clear()

@@ -4,7 +4,7 @@ from utils import (
     Particion,
     Memoria,
     tabla,
-    mostrar_estadistica,
+    mostrar_estadisticas,
     mostrar_estado,
 )
 
@@ -65,14 +65,17 @@ def Run(cola_nuevos: list[Proceso], FULL_RUN):
         if CPU_LIBRE:
             quantum = 2
 
-        if FULL_RUN:
-            input("[!] Ingrese Enter para continuar al siguiente tiempo de clock:\n")
-            print(f"[!] - Quantum igual a: {quantum}")
+        # if FULL_RUN:
+            # input("[!] Ingrese Enter para continuar al siguiente tiempo de clock:\n")
+            # print(f"[!] - Quantum igual a: {quantum}")
 
         proceso = cola_listos[0]
         proceso.estado = "Ejecutando"
 
         if FULL_RUN:
+            input("[!] Ingrese Enter para continuar al siguiente tiempo de clock:\n")
+            print(f"[!] - Quantum igual a: {quantum}")
+
             mostrar_estado(
                 cola_nuevos, cola_listos, cola_finalizados, memoria_principal, clock
             )
@@ -80,7 +83,6 @@ def Run(cola_nuevos: list[Proceso], FULL_RUN):
         clock += 1
         proceso.tiempo_irrupcion -= 1
 
-        # EXPERIMENTAL
         for p in cola_listos[1:]:
             if p.estado == "Listo":
                 p.tiempo_espera += 1
@@ -96,9 +98,19 @@ def Run(cola_nuevos: list[Proceso], FULL_RUN):
                 proceso.particion = None
 
             cola_finalizados.append(proceso)
-            cola_listos.pop(0)
             CPU_LIBRE = True
 
+            # REVISAR QUÉ ERA LO QUE QUERÍA VER EL PROFE. ACÁ NO ME GUSTA PORQUE MUESTRA EL QUANTO EN 0. YO QUIERO QUE SE MUESTRE CADA VEZ QUE HAY UN CAMBIO DE CONTEXTO
+            if not FULL_RUN:
+                input("[!] Ingrese Enter para continuar al siguiente estado.")
+                print(f"[!] - Quantum igual a: {quantum}")
+                print(f"[!] - Finaliza el proceso: {proceso.pid}")
+                mostrar_estado(
+                    cola_nuevos, cola_listos, cola_finalizados, memoria_principal, clock
+                )
+                
+                # Retiro a ese proceso de la cola de listos.
+                cola_listos.pop(0)
             if len(cola_listos) == 0 and len(cola_nuevos) == 0:
                 break
         else:
@@ -112,13 +124,7 @@ def Run(cola_nuevos: list[Proceso], FULL_RUN):
                 cola_listos.append(cola_listos.pop(0))
                 CPU_LIBRE = True
 
-                # REVISAR QUÉ ERA LO QUE QUERÍA VER EL PROFE. ACÁ NO ME GUSTA PORQUE MUESTRA EL QUANTO EN 0. YO QUIERO QUE SE MUESTRE CADA VEZ QUE HAY UN CAMBIO DE CONTEXTO
-                # if not FULL_RUN:
-                #     input("[!] Ingrese Enter para continuar al siguiente estado.")
-                #     print(f"[!] - Quantum igual a: {quantum}")
-                #     mostrar_estado(
-                #         cola_nuevos, cola_listos, cola_finalizados, memoria_principal, clock
-                #     )
+                
 
         # Cambio de contexto
         if cola_listos[0].estado == "Suspendido":
@@ -138,18 +144,19 @@ def Run(cola_nuevos: list[Proceso], FULL_RUN):
             proceso.estado = "Listo"
             min_particion.proceso = proceso
             min_particion.frag_interna = min_particion.tamaño - proceso.tamaño
-
+            
             # REVISAR QUÉ ERA LO QUE QUERÍA VER EL PROFE. ACÁ NO ME GUSTA PORQUE MUESTRA EL QUANTO EN 0. YO QUIERO QUE SE MUESTRE CADA VEZ QUE HAY UN CAMBIO DE CONTEXTO
-            # if not FULL_RUN:
-            #     input("[!] Ingrese Enter para continuar al siguiente estado.")
-            #     print(f"[!] - Quantum igual a: {quantum}")
-            #     mostrar_estado(
-            #         cola_nuevos, cola_listos, cola_finalizados, memoria_principal, clock
-            #     )
+            if not FULL_RUN:
+                input("[!] Ingrese Enter para continuar al siguiente estado.")
+                print(f"[!] - Quantum igual a: {quantum}")
+                print(f"[!] - {proceso.pid} pasa a \'Listo\'")
+                mostrar_estado(
+                    cola_nuevos, cola_listos, cola_finalizados, memoria_principal, clock
+                )
 
         continue
 
     mostrar_estado(cola_nuevos, cola_listos, cola_finalizados, memoria_principal, clock)
 
     print(f"El simulador completó su tarea en {clock} tiempos de clock.")
-    mostrar_estadistica(cola_finalizados)
+    mostrar_estadisticas(cola_finalizados)
