@@ -1,3 +1,4 @@
+from copy import deepcopy
 from rich import print
 from utils import (
     Proceso,
@@ -65,10 +66,6 @@ def Run(cola_nuevos: list[Proceso], FULL_RUN):
         if CPU_LIBRE:
             quantum = 2
 
-        # if FULL_RUN:
-            # input("[!] Ingrese Enter para continuar al siguiente tiempo de clock:\n")
-            # print(f"[!] - Quantum igual a: {quantum}")
-
         proceso = cola_listos[0]
         proceso.estado = "Ejecutando"
 
@@ -96,11 +93,14 @@ def Run(cola_nuevos: list[Proceso], FULL_RUN):
             if proceso.particion is not None:
                 proceso.particion.proceso = None
                 proceso.particion = None
-
+            
+            # Genero una copia porque estabamos teniendo conflictos con comportamientos indefinidos en ciertas partes.
+            proceso = deepcopy(proceso)
             cola_finalizados.append(proceso)
             CPU_LIBRE = True
+            # Retiro al proceso de la cola de listos.
+            cola_listos.pop(0)
 
-            # REVISAR QUÉ ERA LO QUE QUERÍA VER EL PROFE. ACÁ NO ME GUSTA PORQUE MUESTRA EL QUANTO EN 0. YO QUIERO QUE SE MUESTRE CADA VEZ QUE HAY UN CAMBIO DE CONTEXTO
             if not FULL_RUN:
                 input("[!] Ingrese Enter para continuar al siguiente estado.")
                 print(f"[!] - Quantum igual a: {quantum}")
@@ -108,9 +108,8 @@ def Run(cola_nuevos: list[Proceso], FULL_RUN):
                 mostrar_estado(
                     cola_nuevos, cola_listos, cola_finalizados, memoria_principal, clock
                 )
+
                 
-                # Retiro a ese proceso de la cola de listos.
-                cola_listos.pop(0)
             if len(cola_listos) == 0 and len(cola_nuevos) == 0:
                 break
         else:
@@ -145,7 +144,6 @@ def Run(cola_nuevos: list[Proceso], FULL_RUN):
             min_particion.proceso = proceso
             min_particion.frag_interna = min_particion.tamaño - proceso.tamaño
             
-            # REVISAR QUÉ ERA LO QUE QUERÍA VER EL PROFE. ACÁ NO ME GUSTA PORQUE MUESTRA EL QUANTO EN 0. YO QUIERO QUE SE MUESTRE CADA VEZ QUE HAY UN CAMBIO DE CONTEXTO
             if not FULL_RUN:
                 input("[!] Ingrese Enter para continuar al siguiente estado.")
                 print(f"[!] - Quantum igual a: {quantum}")
@@ -155,8 +153,6 @@ def Run(cola_nuevos: list[Proceso], FULL_RUN):
                 )
 
         continue
-
-    mostrar_estado(cola_nuevos, cola_listos, cola_finalizados, memoria_principal, clock)
 
     print(f"El simulador completó su tarea en {clock} tiempos de clock.")
     mostrar_estadisticas(cola_finalizados)

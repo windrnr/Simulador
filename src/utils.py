@@ -1,4 +1,5 @@
 from reader import read_data
+from rich import print
 from rich.console import Console
 from rich.table import Table
 from rich.columns import Columns
