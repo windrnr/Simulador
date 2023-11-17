@@ -64,7 +64,7 @@ def generar_desde_archivo(fuente, tamaño: int) -> list[Proceso]:
     return resultado
 
 
-def tabla(title: str, data: list[Proceso], headers: list):
+def tabla_inicio(title: str, data: list[Proceso], headers: list):
     """
     Imprime por pantalla una tabla con los procesos dentro de una lista.
     """
@@ -152,6 +152,48 @@ def mostrar_estadisticas(
     Console().print(Columns([tabla_estadistica, "\t", tabla_promedios]))
 
 
+def generar_tabla(datos: list[Proceso] | Memoria, title:str, header_style: str) -> Table:
+    """
+    Genera tablas con la información recibida.
+    """
+    nombres_columnas = ["PID", "TAM(KB)", "TA", "TI", "ESTADO"]
+    memoria_columnas = ["DIRECCIÓN", "TAM(KB)", "FRAG(KB)", "PID", "TAM(KB)"]
+    title_style = "bold"
+    
+    tabla = Table(
+        title=title,
+        show_header=True,
+        header_style=header_style,
+        title_style=title_style,
+    )
+
+    if type(datos) == Memoria:
+        for columna in memoria_columnas:
+            tabla.add_column(columna, justify="center")
+        for particion in datos.particiones:
+            if particion and particion.proceso is not None:
+                tabla.add_row(
+                    str(hex(id(particion))),
+                    str(particion.tamaño),
+                    str(particion.frag_interna),
+                    str(particion.proceso.pid),
+                    str(particion.proceso.tamaño),
+                )
+    elif type(datos) ==  list:
+        for columna in nombres_columnas:
+            tabla.add_column(columna, justify="center")
+        for p in datos:
+            tabla.add_row(
+                str(p.pid),
+                str(p.tamaño),
+                str(p.tiempo_arribo),
+                str(p.tiempo_irrupcion),
+                p.estado,
+            )
+
+    return tabla
+
+
 def mostrar_estado(
     cola_nuevos: list[Proceso],
     cola_listos: list[Proceso],
@@ -161,96 +203,25 @@ def mostrar_estado(
     """
     Imprime por pantalla varias tablas con la información de los procesos de cada cola.
     """
-    nombres_columnas = ["PID", "TAM(KB)", "TA", "TI", "ESTADO"]
-    memoria_columnas = ["DIRECCIÓN", "TAM(KB)", "FRAG(KB)", "PID", "TAM(KB)"]
 
-    title_style = "bold"
-
-    tabla_memoria = Table(
-        title="Memoria",
-        show_header=True,
-        header_style="bold blue",
-        title_style=title_style,
-    )
-
-    for columna in memoria_columnas:
-        tabla_memoria.add_column(columna, justify="center")
-    for particion in memoria.particiones:
-        if particion and particion.proceso is not None:
-            tabla_memoria.add_row(
-                str(hex(id(particion))),
-                str(particion.tamaño),
-                str(particion.frag_interna),
-                str(particion.proceso.pid),
-                str(particion.proceso.tamaño),
-            )
-
-    tabla_nuevos = Table(
-        title="Cola de Nuevos",
-        show_header=True,
-        header_style="bold yellow",
-        title_style=title_style,
-    )
-    for columna in nombres_columnas:
-        tabla_nuevos.add_column(columna, justify="center")
-    for p in cola_nuevos:
-        tabla_nuevos.add_row(
-            str(p.pid),
-            str(p.tamaño),
-            str(p.tiempo_arribo),
-            str(p.tiempo_irrupcion),
-            p.estado,
-        )
-
-    tabla_listos = Table(
-        title="Cola de Listos",
-        show_header=True,
-        header_style="bold cyan",
-        title_style=title_style,
-    )
-    for columna in nombres_columnas:
-        tabla_listos.add_column(columna, justify="center")
-    for p in cola_listos:
-        tabla_listos.add_row(
-            str(p.pid),
-            str(p.tamaño),
-            str(p.tiempo_arribo),
-            str(p.tiempo_irrupcion),
-            p.estado,
-        )
+    lista_tablas = []
+    tabla_memoria = generar_tabla(memoria, "Memoria" ,"bold blue")
+    lista_tablas += [tabla_memoria, "\t"]
+    if len(cola_nuevos) != 0:
+        tabla_nuevos = generar_tabla(cola_nuevos,"Cola de Nuevos", "bold yellow") 
+        lista_tablas += [tabla_nuevos, "\t"]
+    else:
+        print("[!] - La cola de Nuevos está vacía.")
+    if len(cola_listos) != 0:
+        tabla_listos = generar_tabla(cola_listos,"Cola de Listos", "bold cyan") 
+        lista_tablas += [tabla_listos, "\t"]
+    else:
+        print("[!] - La cola de Listos está vacía.")
 
     if len(cola_finalizados) != 0:
-        tabla_finalizados = Table(
-            title="Procesos Finalizados",
-            show_header=True,
-            header_style="bold green",
-            title_style=title_style,
-        )
-        for columna in nombres_columnas:
-            tabla_finalizados.add_column(columna, justify="center")
-        for p in cola_finalizados:
-            tabla_finalizados.add_row(
-                str(p.pid),
-                str(p.tamaño),
-                str(p.tiempo_arribo),
-                str(p.tiempo_irrupcion),
-                p.estado,
-            )
+        tabla_finalizados = generar_tabla(cola_finalizados,"Procesos Finalizados", "bold green")
+        lista_tablas += [tabla_finalizados]
 
-        Console().print(
-            Columns(
-                [
-                    tabla_memoria,
-                    "\t",
-                    tabla_nuevos,
-                    "\t",
-                    tabla_listos,
-                    "\t",
-                    tabla_finalizados,
-                ]
-            )
-        )
-    else:
-        Console().print(
-            Columns([tabla_memoria, "\t", tabla_nuevos, "\t", tabla_listos])
-        )
+    Console().print(
+        Columns(lista_tablas)
+    )

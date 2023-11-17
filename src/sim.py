@@ -4,7 +4,7 @@ from utils import (
     Proceso,
     Particion,
     Memoria,
-    tabla,
+    tabla_inicio,
     mostrar_estadisticas,
     mostrar_estado,
 )
@@ -51,7 +51,8 @@ def Run(cola_nuevos: list[Proceso], FULL_RUN, ININTERRUMPIDO):
     cola_finalizados: list[Proceso] = []
 
     CPU_LIBRE = True
-    tabla(
+
+    tabla_inicio(
         "[ϴ] Carga de trabajo que ingresa al simulador (Cola de Nuevos):",
         cola_nuevos,
         ["PID", "TAM(KB)", "TA", "TI", "ESTADO"],
@@ -62,28 +63,21 @@ def Run(cola_nuevos: list[Proceso], FULL_RUN, ININTERRUMPIDO):
 
     while True:
         asignacion_a_memoria(cola_nuevos, cola_listos, memoria_principal, clock)
-        
+
         if CPU_LIBRE:
             quantum = 2
 
         proceso = cola_listos[0]
         proceso.estado = "Ejecutando"
 
-        if FULL_RUN and not ININTERRUMPIDO:
-            input("[!] Ingrese Enter para continuar al siguiente tiempo de clock:\n")
+        if FULL_RUN:
+            input("[!] Ingrese Enter para continuar al siguiente tiempo de clock:\n") if not ININTERRUMPIDO else None
             print(f"[!] - En el tiempo de clock: {clock}")
             print(f"[!] - Quantum igual a: {quantum}")
             mostrar_estado(
-                cola_nuevos, cola_listos, cola_finalizados, memoria_principal 
+                cola_nuevos, cola_listos, cola_finalizados, memoria_principal
             )
-        elif FULL_RUN and ININTERRUMPIDO:
-            print(f"[!] - En el tiempo de clock: {clock}")
-            print(f"[!] - Quantum igual a: {quantum}")
-            mostrar_estado(
-                cola_nuevos, cola_listos, cola_finalizados, memoria_principal 
-            )
-
-
+        
         clock += 1
         proceso.tiempo_irrupcion -= 1
 
@@ -108,23 +102,15 @@ def Run(cola_nuevos: list[Proceso], FULL_RUN, ININTERRUMPIDO):
             # Retiro al proceso de la cola de listos.
             cola_listos.pop(0)
 
-            if not FULL_RUN and not ININTERRUMPIDO:
-                input("[!] Ingrese Enter para continuar al siguiente estado.")
+            if not FULL_RUN:
+                input("[!] Ingrese Enter para continuar al siguiente estado.") if not ININTERRUMPIDO else None
                 print(f"[!] - En el tiempo de clock: {clock}")
                 print(f"[!] - Quantum igual a: {quantum}")
                 print(f"[!] - Finaliza el proceso: {proceso.pid}")
                 mostrar_estado(
                     cola_nuevos, cola_listos, cola_finalizados, memoria_principal
                 )
-            elif not FULL_RUN and ININTERRUMPIDO:
-                print(f"[!] - En el tiempo de clock: {clock}")
-                print(f"[!] - Quantum igual a: {quantum}")
-                print(f"[!] - Finaliza el proceso: {proceso.pid}")
-                mostrar_estado(
-                    cola_nuevos, cola_listos, cola_finalizados, memoria_principal
-                )
-
-
+            
             if len(cola_listos) == 0 and len(cola_nuevos) == 0:
                 break
         else:
@@ -159,22 +145,15 @@ def Run(cola_nuevos: list[Proceso], FULL_RUN, ININTERRUMPIDO):
             min_particion.proceso = proceso
             min_particion.frag_interna = min_particion.tamaño - proceso.tamaño
 
-            if not FULL_RUN and not ININTERRUMPIDO:
-                input("[!] Ingrese Enter para continuar al siguiente estado.")
+            if not FULL_RUN: 
+                input("[!] Ingrese Enter para continuar al siguiente estado.") if not ININTERRUMPIDO else None
                 print(f"[!] - En el tiempo de clock: {clock}")
                 print(f"[!] - Quantum igual a: {quantum}")
                 print(f"[!] - {proceso.pid} pasa a 'Listo'")
                 mostrar_estado(
-                    cola_nuevos, cola_listos, cola_finalizados, memoria_principal 
+                    cola_nuevos, cola_listos, cola_finalizados, memoria_principal
                 )
-            elif not FULL_RUN and ININTERRUMPIDO:
-                print(f"[!] - En el tiempo de clock: {clock}")
-                print(f"[!] - Quantum igual a: {quantum}")
-                print(f"[!] - {proceso.pid} pasa a 'Listo'")
-                mostrar_estado(
-                    cola_nuevos, cola_listos, cola_finalizados, memoria_principal 
-                )
-
+            
         continue
 
     print(f"El simulador completó su tarea en {clock} tiempos de clock.\n")
