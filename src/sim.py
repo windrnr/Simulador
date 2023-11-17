@@ -13,6 +13,8 @@ from utils import (
 
 def asignar(proceso: Proceso, particion: Particion):
     proceso.estado = "Listo"
+
+    # Actualizo las referencias tanto de la partición como del proceso   
     particion.proceso = proceso
     particion.frag_interna = particion.tamaño - proceso.tamaño
     proceso.particion = particion
@@ -94,7 +96,6 @@ def Run(cola_nuevos: list[Proceso], FULL_RUN, ININTERRUMPIDO):
     quantum = 2
     cola_listos: list[Proceso] = []
     cola_finalizados: list[Proceso] = []
-
     CPU_LIBRE = True
 
     tabla_inicio(
@@ -121,7 +122,10 @@ def Run(cola_nuevos: list[Proceso], FULL_RUN, ININTERRUMPIDO):
         if CPU_LIBRE:
             quantum = 2
 
-        # Esto debido a que si tengo procesos con tiempos de arribo con una diferencia más grande de un quanto, la cola de listos estará vacía por un periodo largo y indexar lista vacía es un error.
+        '''
+            Esto debido a que si tengo procesos con tiempos de arribo con una diferencia más grande que quantum,
+            la cola de listos estará vacía por un periodo largo e Indexar lista vacía es un error.
+        ''' 
         if len(cola_listos) == 0:
             clock += 1
             continue
@@ -168,12 +172,14 @@ def Run(cola_nuevos: list[Proceso], FULL_RUN, ININTERRUMPIDO):
             proceso.estado = "Finalizado"
             proceso.instante_salida = clock
 
+            # Actualizo las referencias tanto de la partición como del proceso   
             if (particion := proceso.particion) is not None:
                 particion.proceso = None
                 particion = None
 
             # Genero una copia porque estabamos teniendo conflictos con comportamientos indefinidos en ciertas partes.
             proceso = deepcopy(proceso)
+            proceso.tiempo_irrupcion = proceso.resguardo_tiempo_irrupcion
             cola_finalizados.append(proceso)
             CPU_LIBRE = True
             # Retiro al proceso de la cola de listos.
@@ -208,7 +214,7 @@ def Run(cola_nuevos: list[Proceso], FULL_RUN, ININTERRUMPIDO):
 
         # Cambio de contexto
         if len(cola_listos) > 0:
-            aux = 0
+            resg_pid = 0
             if cola_listos[0].estado == "Suspendido":
                 proceso = cola_listos[0]
                 min_frag = 999
@@ -222,10 +228,14 @@ def Run(cola_nuevos: list[Proceso], FULL_RUN, ININTERRUMPIDO):
 
                 if (p := min_particion.proceso) is not None:
                     p.estado = "Suspendido"
+                    resg_pid = p.pid
 
                 proceso.estado = "Listo"
+
+                # Actualizo las referencias tanto de la partición como del proceso   
                 min_particion.proceso = proceso
                 proceso.particion = min_particion
+
                 min_particion.frag_interna = min_particion.tamaño - proceso.tamaño
 
                 if not FULL_RUN:
@@ -235,7 +245,7 @@ def Run(cola_nuevos: list[Proceso], FULL_RUN, ININTERRUMPIDO):
                     print("◎  Información:")
                     print(f"  ◉  Tiempo de Clock: {clock}")
                     print(f"  ◉  Quantum igual a: {quantum}")
-                    print(f"  ◉  {proceso.pid} pasa a 'Listo'")
+                    print(f"  ◉  Swap-In: {proceso.pid}") if resg_pid == 0 else print(f"  ◉  Swap-Out: {resg_pid} y Swap-In: {proceso.pid}")
                     mostrar_estado(
                         cola_nuevos, cola_listos, cola_finalizados, memoria_principal
                     )

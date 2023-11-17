@@ -18,6 +18,15 @@ def validar_positivo(answers, current):
             "", reason="El valor ingresado no es un número positivo."
         )
 
+def validar_mayor_a_cero(answers, current):
+    try:
+        if int(current) > 0:
+            return True
+    except:
+        raise errors.ValidationError(
+            "", reason="El valor ingresado no debe ser menor o igual a cero."
+        )
+
 
 def validar_tamaño(answers, current):
     try:
@@ -91,7 +100,7 @@ def Prompt(FULL_RUN, ININTERRUMPIDO):
                     inquirer.Text(
                         name="pid",
                         message="ID",
-                        validate=validar_positivo,
+                        validate=validar_mayor_a_cero,
                     ),
                     inquirer.Text(
                         name="tiempo_arribo",
@@ -101,7 +110,7 @@ def Prompt(FULL_RUN, ININTERRUMPIDO):
                     inquirer.Text(
                         name="tiempo_irrupcion",
                         message="Tiempo de irrupción",
-                        validate=validar_positivo,
+                        validate=validar_mayor_a_cero,
                     ),
                     inquirer.Text(
                         name="tamaño",
