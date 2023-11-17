@@ -9,8 +9,10 @@ def read_data(file_path: Path) -> dict:
     """
     if file_path.suffix == ".csv":
         data = csv_reader(file_path)
-    else:
+    elif file_path.suffix == ".json":
         data = json_reader(file_path)
+    else:
+        raise NotImplementedError
 
     return data
 

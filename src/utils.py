@@ -1,4 +1,5 @@
 from reader import read_data
+from pathlib import Path
 from rich import print
 from rich.console import Console
 from rich.table import Table
@@ -41,7 +42,7 @@ class Proceso:
         return data
 
 
-def generar_desde_archivo(fuente, tamaño: int) -> list[Proceso]:
+def generar_desde_archivo(fuente:Path, tamaño: int) -> list[Proceso]:
     """
     Se genera la cola a partir de un dictionary con los datos del archivo.
     """

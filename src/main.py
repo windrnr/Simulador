@@ -47,6 +47,8 @@ def main() -> None:
 
     except KeyboardInterrupt:
         print("\nSimulador apagándose..")
+    except NotImplementedError:
+        print("\nEl archivo de entrada debe ser '.csv' o '.json'.")
     except Exception:
         traceback.print_exc(file=sys.stdout)
     sys.exit(0)

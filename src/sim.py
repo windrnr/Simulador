@@ -225,6 +225,7 @@ def Run(cola_nuevos: list[Proceso], FULL_RUN, ININTERRUMPIDO):
 
                 proceso.estado = "Listo"
                 min_particion.proceso = proceso
+                proceso.particion = min_particion
                 min_particion.frag_interna = min_particion.tamaño - proceso.tamaño
 
                 if not FULL_RUN:
@@ -248,7 +249,7 @@ def Run(cola_nuevos: list[Proceso], FULL_RUN, ININTERRUMPIDO):
 
         print("◎  Información:")
         print(f"  ◉  Tiempo de Clock: {clock}")
-        print(f"  ◉  Quantum igual a AA: {quantum}")
+        print(f"  ◉  Quantum igual a: {quantum}")
         mostrar_estado(cola_nuevos, cola_listos, cola_finalizados, memoria_principal)
 
     print(
