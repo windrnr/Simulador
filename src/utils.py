@@ -211,12 +211,12 @@ def mostrar_estado(
         tabla_nuevos = generar_tabla(cola_nuevos,"Cola de Nuevos", "bold yellow") 
         lista_tablas += [tabla_nuevos, "\t"]
     else:
-        print("[!] - La cola de Nuevos está vacía.")
+        print("  ◉  La cola de Nuevos está vacía.")
     if len(cola_listos) != 0:
         tabla_listos = generar_tabla(cola_listos,"Cola de Listos", "bold cyan") 
         lista_tablas += [tabla_listos, "\t"]
     else:
-        print("[!] - La cola de Listos está vacía.")
+        print("  ◉  La cola de Listos está vacía.")
 
     if len(cola_finalizados) != 0:
         tabla_finalizados = generar_tabla(cola_finalizados,"Procesos Finalizados", "bold green")

@@ -72,8 +72,9 @@ def Run(cola_nuevos: list[Proceso], FULL_RUN, ININTERRUMPIDO):
 
         if FULL_RUN:
             input("[!] Ingrese Enter para continuar al siguiente tiempo de clock:\n") if not ININTERRUMPIDO else None
-            print(f"[!] - En el tiempo de clock: {clock}")
-            print(f"[!] - Quantum igual a: {quantum}")
+            print("◎  Datos:")
+            print(f"  ◉  En el tiempo de clock: {clock}")
+            print(f"  ◉  Quantum igual a: {quantum}")
             mostrar_estado(
                 cola_nuevos, cola_listos, cola_finalizados, memoria_principal
             )
@@ -104,9 +105,10 @@ def Run(cola_nuevos: list[Proceso], FULL_RUN, ININTERRUMPIDO):
 
             if not FULL_RUN:
                 input("[!] Ingrese Enter para continuar al siguiente estado.") if not ININTERRUMPIDO else None
-                print(f"[!] - En el tiempo de clock: {clock}")
-                print(f"[!] - Quantum igual a: {quantum}")
-                print(f"[!] - Finaliza el proceso: {proceso.pid}")
+                print("◎  Datos:")
+                print(f"  ◉  En el tiempo de clock: {clock}")
+                print(f"  ◉  Quantum igual a: {quantum}")
+                print(f"  ◉  Finaliza el proceso: {proceso.pid}")
                 mostrar_estado(
                     cola_nuevos, cola_listos, cola_finalizados, memoria_principal
                 )
@@ -147,14 +149,24 @@ def Run(cola_nuevos: list[Proceso], FULL_RUN, ININTERRUMPIDO):
 
             if not FULL_RUN: 
                 input("[!] Ingrese Enter para continuar al siguiente estado.") if not ININTERRUMPIDO else None
-                print(f"[!] - En el tiempo de clock: {clock}")
-                print(f"[!] - Quantum igual a: {quantum}")
-                print(f"[!] - {proceso.pid} pasa a 'Listo'")
+                print("◎  Datos:")
+                print(f"  ◉  En el tiempo de clock: {clock}")
+                print(f"  ◉  Quantum igual a: {quantum}")
+                print(f"  ◉  {proceso.pid} pasa a 'Listo'")
                 mostrar_estado(
                     cola_nuevos, cola_listos, cola_finalizados, memoria_principal
                 )
             
         continue
+
+    if FULL_RUN:
+        input("[!] Ingrese Enter para continuar al siguiente tiempo de clock:\n") if not ININTERRUMPIDO else None
+        print("◎  Datos:")
+        print(f"  ◉  En el tiempo de clock: {clock}")
+        print(f"  ◉  Quantum igual a: {quantum}")
+        mostrar_estado(
+            cola_nuevos, cola_listos, cola_finalizados, memoria_principal
+        )
 
     print(f"El simulador completó su tarea en {clock} tiempos de clock.\n")
     mostrar_estadisticas(cola_finalizados)
