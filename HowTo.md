@@ -1,45 +1,52 @@
 # Simulador de asignación de memoria y planificación de procesos
 
-## Material de Interés:
-- Trello: https://shorturl.at/xH047
-- Libro de William Stallings: https://shorturl.at/mJLU6
-- Libro de Tanenbaum: https://shorturl.at/jzQZ8
-- **En el archivo Git.md** les dejé una descripción de los pasos a realizar para descargar el repositorio y poder contribuir usando git.
-- Compilador de Python: https://github.com/Nuitka/Nuitka
+## Uso:
 
-## Consigna
-El simulador deberá brindar la posibilidad de cargar procesos por parte del usuario. Para facilitar la implementación se permitirán como máximo 10 procesos y la asignación de memoria se realizará con particiones fijas. El esquema de particiones será el siguiente:
-- 100K destinados al Sistema Operativo.
-- 250K para trabajos los más grandes.
-- 120K para trabajos medianos.
-- 60K para trabajos pequeños.
+Para ejecutar el programa nos debemos posicionar en la carpeta dist:
 
-## Funcionamiento
-- El programa debe permitir ingreso de nuevos procesos cuando sea posible ( **manteniendo el grado de
-multiprogramación en 5** ). 
-- La política de asignación de memoria será Best-Fit.
-- Por cada proceso se debe ingresar o leer desde un archivo:
-    - ID de proceso.
-    - Tamaño del proceso. 
-    - Tiempo de arribo 
-    - Tiempo de irrupción.
-- La planificación de CPU será dirigida por un algoritmo Round-Robin con q=2.
-- Las presentaciones de salida deberán realizarse cada vez que llega un nuevo proceso y cuando se termina un proceso en ejecución.
-- No se permiten corridas ininterrumpidas de simulador, desde que se inicia la simulación hasta que termina el último proceso. (Quiere que el usuario controle el avance del programa, presionando enter o cualquier otro método).
+Linux:
+./Capybara
 
-### El simulador deberá presentar como salida la siguiente información:
-- El estado del procesador (proceso que se encuentra corriendo en ese instante)
-- La tabla de particiones de memoria, la cual deberá contener (Id de partición, dirección de comienzo de
-partición, tamaño de la partición, id de proceso asignado a la partición, fragmentación interna)
-- El estado de la cola de procesos listos.
-- Al finalizar la simulación se deberá presentar un informe estadístico con, tiempo de retorno y espera para cada
-proceso y los respectivos tiempos promedios.
+Windows:
+.\Capybara.exe
 
-## Fechas de Entrega:
-- 10/10
-- 07/11
-- 14/11
-- La entrega final será el 21 de noviembre.
-- El **coloquio de defensa del TPI se llevará a cabo el 28/11 o 07/12** (a confirmar para cada grupo).
+Luego debemos elegir si cargar los procesos por terminal o desde un archivo json o csv
 
+- Selección de Terminal:
+  Se debe ingresar la cantidad de procesos a cargar y de cada proceso el ID, tiempo de arribo (TA), tiempo de irrupción (TI) y Tamaño (TAM)
+- Selección de Archivo:
+  Se debe ingresar el path del archivo, por ejemplo: ../test/test-1ConTA10.json
 
+Una vez cargada la carga de trabajo solo se debe avanzar con enter hasta que termina.
+Si se desea finalizar antes de tiempo presione ctrl+c
+
+Otra forma de ejecutar el programa es llamar al Archivo json o csv de la siguiente manera:
+
+Linux:
+./Capybara ../test/<nombre-archivo.extensión>
+
+Windows:
+.\Capybara.exe ..\test\<nombre-archivo.extensión>
+
+## Comandos:
+
+-h: abre una interfaz de ayuda donde se especifica el uso de los comandos -i y -f.
+-i: ejecuta el programa sin interrupciones.
+-f: ejecuta el programa avanzando el clock de a 1.
+-if o -fi: combina los comandos -i y -f, ejecutando el programa sin interrupciones y avanzando de a 1 el clock
+
+Linux:
+./Capybara -<comando>
+
+Windows:
+.\Capybara.exe -<comando>
+
+## Ejecución con comando y archivo incluido
+
+Puede combinar todas las formas de ejecucion:
+
+Linux:
+./Capybara -comando ../test/nombre-archivo.extensión
+
+Windows:
+.\Capybara.exe -comando ..\test\<nombre-archivo.extensión>
