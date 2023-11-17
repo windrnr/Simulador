@@ -35,13 +35,19 @@ def asignacion_a_memoria(
 
     lista_auxiliar_listos = []
     lista_auxiliar_suspendidos = []
+    lista_auxiliar = []
     for p in cola_listos:
         if p.estado == "Suspendido" and p.tiempo_arribo <= clock:
-            lista_auxiliar_suspendidos.append(p)
+            lista_auxiliar.append(p)
         continue
 
-    for p in lista_auxiliar_suspendidos:
-        print(p.pid)
+    for p in lista_auxiliar:
+        for particion in memoria_principal.particiones:
+            if particion.proceso is None:
+                if p.tamaño <= particion.tamaño:
+                    asignar(p, particion)
+                    lista_auxiliar_suspendidos.append(p)
+                    break
     
 
 
@@ -64,18 +70,22 @@ def asignacion_a_memoria(
         cola_listos.append(proceso)
 
     if not FULL_RUN:
-        if len(lista_auxiliar_listos) > 0:
+        if len(lista_auxiliar_listos) > 0 or len(lista_auxiliar_suspendidos) > 0:
             input(
                 "[!] Ingrese Enter para continuar al siguiente estado."
             ) if not ININTERRUMPIDO else None
             print("◎  Información:")
             print(f"  ◉  Tiempo de Clock: {clock}")
             print(f"  ◉  Quantum igual a: {quantum}")
-            for p in lista_auxiliar_listos:
-                print(f"  ◉  {p.pid} pasa de 'Nuevo' a 'Listo'")
+            print(f"  ◉  {', '.join(str(p.pid) for p in lista_auxiliar_listos)} pasa de 'Nuevo' a 'Listo'") if len(lista_auxiliar_listos) > 0 else None
+            print(f"  ◉  {', '.join(str(p.pid) for p in lista_auxiliar_suspendidos)} pasa de 'Suspendido' a 'Listo'") if len(lista_auxiliar_suspendidos) > 0 else None
+
             mostrar_estado(
                 cola_nuevos, cola_listos, cola_finalizados, memoria_principal
             )
+    
+    lista_auxiliar_listos = []
+    lista_auxiliar_suspendidos = []
 
 
 
@@ -233,7 +243,7 @@ def Run(cola_nuevos: list[Proceso], FULL_RUN, ININTERRUMPIDO):
 
         print("◎  Información:")
         print(f"  ◉  Tiempo de Clock: {clock}")
-        print(f"  ◉  Quantum igual a: {quantum}")
+        print(f"  ◉  Quantum igual a AA: {quantum}")
         mostrar_estado(cola_nuevos, cola_listos, cola_finalizados, memoria_principal)
 
     print(

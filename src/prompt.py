@@ -35,7 +35,7 @@ def validar_carga(answers, current):
             return True
     except:
         raise errors.ValidationError(
-            "", reason="El valor ingresado debe estar en el intervalo [5;10] ."
+            "", reason="La cantidad de proceso no debe ser mayor a 10."
         )
 
 
