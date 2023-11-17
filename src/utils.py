@@ -169,7 +169,7 @@ def generar_tabla(
         title_style=title_style,
     )
 
-    if type(datos) == Memoria:
+    if isinstance(datos, Memoria):
         for columna in memoria_columnas:
             tabla.add_column(columna, justify="center")
         for particion in datos.particiones:
@@ -181,7 +181,7 @@ def generar_tabla(
                     str(particion.proceso.pid),
                     str(particion.proceso.tamaño),
                 )
-    elif type(datos) == list:
+    elif isinstance(datos, list):
         for columna in nombres_columnas:
             tabla.add_column(columna, justify="center")
         for p in datos:

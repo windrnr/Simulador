@@ -6,8 +6,7 @@ from utils import Proceso, generar_desde_archivo
 
 
 def clear_screen():
-    clear = lambda: os.system("tput reset")
-    clear()
+    os.system("tput reset")
 
 
 def validar_positivo(answers, current):
@@ -18,6 +17,7 @@ def validar_positivo(answers, current):
         raise errors.ValidationError(
             "", reason="El valor ingresado no es un número positivo."
         )
+
 
 def validar_tamaño(answers, current):
     try:

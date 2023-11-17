@@ -1,7 +1,6 @@
 from copy import deepcopy
 from rich import print
 from rich.panel import Panel
-from rich.console import Group
 from utils import (
     Proceso,
     Particion,
@@ -19,9 +18,6 @@ def asignar(proceso: Proceso, particion: Particion):
     proceso.particion = particion
 
 
-
-# ACA FALTA LA LÓGICA CUANDO PARA CARGAR UN PROCESO QUE YA ESTÁ EN LA COLA DE LISTOS PERO NO PUDO ENTRAR EN SU MOMENTO Y SE FUE A SUSPENDIDOS.
-# CAPAZ QUE PROGRAMANDO ALGUN TIPO DE PRIORIDAD SOBRE ESTOS ELEMENTOS ES POSIBLE ARREGLARLO.
 def asignacion_a_memoria(
     cola_nuevos: list[Proceso],
     cola_listos: list[Proceso],
@@ -30,9 +26,8 @@ def asignacion_a_memoria(
     clock: int,
     quantum: int,
     FULL_RUN,
-    ININTERRUMPIDO
+    ININTERRUMPIDO,
 ):
-
     lista_auxiliar_listos = []
     lista_auxiliar_suspendidos = []
     lista_auxiliar = []
@@ -48,8 +43,6 @@ def asignacion_a_memoria(
                     asignar(p, particion)
                     lista_auxiliar_suspendidos.append(p)
                     break
-    
-
 
     while (
         (len(cola_nuevos) > 0)
@@ -77,16 +70,19 @@ def asignacion_a_memoria(
             print("◎  Información:")
             print(f"  ◉  Tiempo de Clock: {clock}")
             print(f"  ◉  Quantum igual a: {quantum}")
-            print(f"  ◉  {', '.join(str(p.pid) for p in lista_auxiliar_listos)} pasa de 'Nuevo' a 'Listo'") if len(lista_auxiliar_listos) > 0 else None
-            print(f"  ◉  {', '.join(str(p.pid) for p in lista_auxiliar_suspendidos)} pasa de 'Suspendido' a 'Listo'") if len(lista_auxiliar_suspendidos) > 0 else None
+            print(
+                f"  ◉  {', '.join(str(p.pid) for p in lista_auxiliar_listos)} pasa de 'Nuevo' a 'Listo'"
+            ) if len(lista_auxiliar_listos) > 0 else None
+            print(
+                f"  ◉  {', '.join(str(p.pid) for p in lista_auxiliar_suspendidos)} pasa de 'Suspendido' a 'Listo'"
+            ) if len(lista_auxiliar_suspendidos) > 0 else None
 
             mostrar_estado(
                 cola_nuevos, cola_listos, cola_finalizados, memoria_principal
             )
-    
+
     lista_auxiliar_listos = []
     lista_auxiliar_suspendidos = []
-
 
 
 def Run(cola_nuevos: list[Proceso], FULL_RUN, ININTERRUMPIDO):
@@ -111,7 +107,16 @@ def Run(cola_nuevos: list[Proceso], FULL_RUN, ININTERRUMPIDO):
         clock += 1
 
     while True:
-        asignacion_a_memoria(cola_nuevos, cola_listos, cola_finalizados, memoria_principal, clock, quantum, FULL_RUN, ININTERRUMPIDO)
+        asignacion_a_memoria(
+            cola_nuevos,
+            cola_listos,
+            cola_finalizados,
+            memoria_principal,
+            clock,
+            quantum,
+            FULL_RUN,
+            ININTERRUMPIDO,
+        )
 
         if CPU_LIBRE:
             quantum = 2
@@ -149,7 +154,6 @@ def Run(cola_nuevos: list[Proceso], FULL_RUN, ININTERRUMPIDO):
                 )
 
             aux = proceso.pid
- 
 
         clock += 1
         proceso.tiempo_irrupcion -= 1
@@ -204,6 +208,7 @@ def Run(cola_nuevos: list[Proceso], FULL_RUN, ININTERRUMPIDO):
 
         # Cambio de contexto
         if len(cola_listos) > 0:
+            aux = 0
             if cola_listos[0].estado == "Suspendido":
                 proceso = cola_listos[0]
                 min_frag = 999
