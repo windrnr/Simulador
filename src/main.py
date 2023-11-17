@@ -6,7 +6,17 @@ from utils import generar_desde_archivo
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(
+        prog="Simulador",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        usage="%(prog)s [options]",
+        description=
+        '''\
+        Trabajo Práctico Integrador de Sistemas Operativos. Simulador de asignación de memoria y planificación de procesos.\n 
+        Autores: Acosta Quintana, L. Stegmayer, T. Vallejos, E. Zappa, E. Obregón, E.
+        ''',
+        epilog="Github Repo: https://github.com/lau-acosta/Simulador"
+    )
     parser.add_argument(
         "-f",
         "--full-run",

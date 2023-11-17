@@ -4,7 +4,6 @@ from rich.console import Console
 from rich.table import Table
 from rich.columns import Columns
 
-
 class Memoria:
     def __init__(self, mapa_de_memoria: list):
         self.particiones: list[Particion] = mapa_de_memoria[1:]
@@ -152,14 +151,16 @@ def mostrar_estadisticas(
     Console().print(Columns([tabla_estadistica, "\t", tabla_promedios]))
 
 
-def generar_tabla(datos: list[Proceso] | Memoria, title:str, header_style: str) -> Table:
+def generar_tabla(
+    datos: list[Proceso] | Memoria, title: str, header_style: str
+) -> Table:
     """
     Genera tablas con la información recibida.
     """
     nombres_columnas = ["PID", "TAM(KB)", "TA", "TI", "ESTADO"]
     memoria_columnas = ["DIRECCIÓN", "TAM(KB)", "FRAG(KB)", "PID", "TAM(KB)"]
     title_style = "bold"
-    
+
     tabla = Table(
         title=title,
         show_header=True,
@@ -179,7 +180,7 @@ def generar_tabla(datos: list[Proceso] | Memoria, title:str, header_style: str) 
                     str(particion.proceso.pid),
                     str(particion.proceso.tamaño),
                 )
-    elif type(datos) ==  list:
+    elif type(datos) == list:
         for columna in nombres_columnas:
             tabla.add_column(columna, justify="center")
         for p in datos:
@@ -205,23 +206,23 @@ def mostrar_estado(
     """
 
     lista_tablas = []
-    tabla_memoria = generar_tabla(memoria, "Memoria" ,"bold blue")
+    tabla_memoria = generar_tabla(memoria, "Memoria", "bold blue")
     lista_tablas += [tabla_memoria, "\t"]
     if len(cola_nuevos) != 0:
-        tabla_nuevos = generar_tabla(cola_nuevos,"Cola de Nuevos", "bold yellow") 
+        tabla_nuevos = generar_tabla(cola_nuevos, "Cola de Nuevos", "bold yellow")
         lista_tablas += [tabla_nuevos, "\t"]
     else:
         print("  ◉  La cola de Nuevos está vacía.")
     if len(cola_listos) != 0:
-        tabla_listos = generar_tabla(cola_listos,"Cola de Listos", "bold cyan") 
+        tabla_listos = generar_tabla(cola_listos, "Cola de Listos", "bold cyan")
         lista_tablas += [tabla_listos, "\t"]
     else:
-        print("  ◉  La cola de Listos está vacía.")
+        print("  ◉  La cola de Listos está vacía.\n")
 
     if len(cola_finalizados) != 0:
-        tabla_finalizados = generar_tabla(cola_finalizados,"Procesos Finalizados", "bold green")
+        tabla_finalizados = generar_tabla(
+            cola_finalizados, "Procesos Finalizados", "bold green"
+        )
         lista_tablas += [tabla_finalizados]
-
-    Console().print(
-        Columns(lista_tablas)
-    )
+    
+    print((Columns(lista_tablas)))
