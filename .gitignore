@@ -3,4 +3,5 @@ build/main.onefile-build
 build/main.build
 src/.CVersion
 env/
+build/
 __pycache__

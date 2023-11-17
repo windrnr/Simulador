@@ -40,7 +40,7 @@ def validar_tamaño(answers, current):
 
 def validar_carga(answers, current):
     try:
-        if int(current) <= 10:
+        if int(current) <= 10 and int(current) > 0:
             return True
     except:
         raise errors.ValidationError(
