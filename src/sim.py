@@ -18,6 +18,8 @@ def asignar(proceso: Proceso, particion: Particion):
     proceso.particion = particion
 
 
+
+# ACA FALTA LA LÓGICA CUANDO PARA CARGAR UN PROCESO QUE YA ESTÁ EN LA COLA DE LISTOS PERO NO PUDO ENTRAR EN SU MOMENTO Y SE FUE A SUSPENDIDOS. CAPAZ QUE PROGRAMANDO ALGUN TIPO DE PRIORIDAD SOBRE ESTOS ELEMENTS ES POSIBLE ARREGLARLO.
 def asignacion_a_memoria(
     cola_nuevos: list[Proceso],
     cola_listos: list[Proceso],
@@ -29,6 +31,8 @@ def asignacion_a_memoria(
         and (cola_nuevos[0].tiempo_arribo <= clock)
         and (len(cola_listos) < 5)
     ):
+
+
         proceso = cola_nuevos.pop(0)
         for particion in memoria_principal.particiones:
             if particion.proceso is None:
@@ -41,7 +45,7 @@ def asignacion_a_memoria(
 
         cola_listos.append(proceso)
 
-
+    
 def Run(cola_nuevos: list[Proceso], FULL_RUN, ININTERRUMPIDO):
     memoria_principal = Memoria(
         [Particion(100), Particion(60), Particion(120), Particion(250)]

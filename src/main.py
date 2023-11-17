@@ -7,14 +7,15 @@ from utils import generar_desde_archivo
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        prog="Simulador",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        usage="%(prog)s [options]",
+        usage="%(prog)s [options] [filepath]",
         description=
         '''\
-        Trabajo Práctico Integrador de Sistemas Operativos. Simulador de asignación de memoria y planificación de procesos.\n 
-        Autores: Acosta Quintana, L. Stegmayer, T. Vallejos, E. Zappa, E. Obregón, E.
-        ''',
+        Trabajo Práctico Integrador de Sistemas Operativos. Simulador de asignación de memoria y planificación de procesos.
+
+        Autores: Acosta Quintana, L., Stegmayer, T., Vallejos, E., Zappa, E. Obregón, E.
+
+        De manera predeterminada, se muestra información cada vez que llega un nuevo proceso y cuando se termina un proceso en ejecución.''',
         epilog="Github Repo: https://github.com/lau-acosta/Simulador"
     )
     parser.add_argument(
