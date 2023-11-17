@@ -1,6 +1,7 @@
 from copy import deepcopy
 from rich import print
 from rich.panel import Panel
+from rich.console import Group
 from utils import (
     Proceso,
     Particion,
@@ -19,25 +20,42 @@ def asignar(proceso: Proceso, particion: Particion):
 
 
 
-# ACA FALTA LA LÓGICA CUANDO PARA CARGAR UN PROCESO QUE YA ESTÁ EN LA COLA DE LISTOS PERO NO PUDO ENTRAR EN SU MOMENTO Y SE FUE A SUSPENDIDOS. CAPAZ QUE PROGRAMANDO ALGUN TIPO DE PRIORIDAD SOBRE ESTOS ELEMENTS ES POSIBLE ARREGLARLO.
+# ACA FALTA LA LÓGICA CUANDO PARA CARGAR UN PROCESO QUE YA ESTÁ EN LA COLA DE LISTOS PERO NO PUDO ENTRAR EN SU MOMENTO Y SE FUE A SUSPENDIDOS.
+# CAPAZ QUE PROGRAMANDO ALGUN TIPO DE PRIORIDAD SOBRE ESTOS ELEMENTOS ES POSIBLE ARREGLARLO.
 def asignacion_a_memoria(
     cola_nuevos: list[Proceso],
     cola_listos: list[Proceso],
+    cola_finalizados: list[Proceso],
     memoria_principal: Memoria,
     clock: int,
+    quantum: int,
+    FULL_RUN,
+    ININTERRUMPIDO
 ):
+
+    lista_auxiliar_listos = []
+    lista_auxiliar_suspendidos = []
+    for p in cola_listos:
+        if p.estado == "Suspendido" and p.tiempo_arribo <= clock:
+            lista_auxiliar_suspendidos.append(p)
+        continue
+
+    for p in lista_auxiliar_suspendidos:
+        print(p.pid)
+    
+
+
     while (
         (len(cola_nuevos) > 0)
         and (cola_nuevos[0].tiempo_arribo <= clock)
         and (len(cola_listos) < 5)
     ):
-
-
         proceso = cola_nuevos.pop(0)
         for particion in memoria_principal.particiones:
             if particion.proceso is None:
                 if proceso.tamaño <= particion.tamaño:
                     asignar(proceso, particion)
+                    lista_auxiliar_listos.append(proceso)
                     break
 
         if proceso.particion is None:
@@ -45,12 +63,28 @@ def asignacion_a_memoria(
 
         cola_listos.append(proceso)
 
-    
+    if not FULL_RUN:
+        if len(lista_auxiliar_listos) > 0:
+            input(
+                "[!] Ingrese Enter para continuar al siguiente estado."
+            ) if not ININTERRUMPIDO else None
+            print("◎  Información:")
+            print(f"  ◉  Tiempo de Clock: {clock}")
+            print(f"  ◉  Quantum igual a: {quantum}")
+            for p in lista_auxiliar_listos:
+                print(f"  ◉  {p.pid} pasa de 'Nuevo' a 'Listo'")
+            mostrar_estado(
+                cola_nuevos, cola_listos, cola_finalizados, memoria_principal
+            )
+
+
+
 def Run(cola_nuevos: list[Proceso], FULL_RUN, ININTERRUMPIDO):
     memoria_principal = Memoria(
         [Particion(100), Particion(60), Particion(120), Particion(250)]
     )
     clock = 0
+    aux = 0
     quantum = 2
     cola_listos: list[Proceso] = []
     cola_finalizados: list[Proceso] = []
@@ -67,14 +101,14 @@ def Run(cola_nuevos: list[Proceso], FULL_RUN, ININTERRUMPIDO):
         clock += 1
 
     while True:
-        asignacion_a_memoria(cola_nuevos, cola_listos, memoria_principal, clock)
+        asignacion_a_memoria(cola_nuevos, cola_listos, cola_finalizados, memoria_principal, clock, quantum, FULL_RUN, ININTERRUMPIDO)
 
         if CPU_LIBRE:
             quantum = 2
 
         # Esto debido a que si tengo procesos con tiempos de arribo con una diferencia más grande de un quanto, la cola de listos estará vacía por un periodo largo y indexar lista vacía es un error.
         if len(cola_listos) == 0:
-            clock += 1 
+            clock += 1
             continue
 
         proceso = cola_listos[0]
@@ -90,6 +124,22 @@ def Run(cola_nuevos: list[Proceso], FULL_RUN, ININTERRUMPIDO):
             mostrar_estado(
                 cola_nuevos, cola_listos, cola_finalizados, memoria_principal
             )
+
+        if not FULL_RUN:
+            if proceso.pid != aux:
+                input(
+                    "[!] Ingrese Enter para continuar al siguiente estado."
+                ) if not ININTERRUMPIDO else None
+                print("◎  Información:")
+                print(f"  ◉  Tiempo de Clock: {clock}")
+                print(f"  ◉  Quantum igual a: {quantum}")
+                print(f"  ◉  La CPU pasa a ejecutar: {proceso.pid}")
+                mostrar_estado(
+                    cola_nuevos, cola_listos, cola_finalizados, memoria_principal
+                )
+
+            aux = proceso.pid
+ 
 
         clock += 1
         proceso.tiempo_irrupcion -= 1
@@ -107,7 +157,6 @@ def Run(cola_nuevos: list[Proceso], FULL_RUN, ININTERRUMPIDO):
             if (particion := proceso.particion) is not None:
                 particion.proceso = None
                 particion = None
-
 
             # Genero una copia porque estabamos teniendo conflictos con comportamientos indefinidos en ciertas partes.
             proceso = deepcopy(proceso)
@@ -187,5 +236,9 @@ def Run(cola_nuevos: list[Proceso], FULL_RUN, ININTERRUMPIDO):
         print(f"  ◉  Quantum igual a: {quantum}")
         mostrar_estado(cola_nuevos, cola_listos, cola_finalizados, memoria_principal)
 
-    print(Panel.fit(f"[bold green] COMPLETADO :heavy_check_mark: [reset] El simulador completó su tarea en [bold green]{clock}[reset] tiempos de clock. \n"))
+    print(
+        Panel.fit(
+            f"[bold green] COMPLETADO :heavy_check_mark: [reset] El simulador completó su tarea en [bold green]{clock}[reset] tiempos de clock. \n"
+        )
+    )
     mostrar_estadisticas(cola_finalizados)

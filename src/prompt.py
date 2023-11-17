@@ -10,13 +10,22 @@ def clear_screen():
     clear()
 
 
-def validar_proceso(answers, current):
+def validar_positivo(answers, current):
     try:
         if int(current) >= 0:
             return True
     except:
         raise errors.ValidationError(
             "", reason="El valor ingresado no es un número positivo."
+        )
+
+def validar_tamaño(answers, current):
+    try:
+        if int(current) >= 0 and int(current) <= 250:
+            return True
+    except:
+        raise errors.ValidationError(
+            "", reason="El tamaño de un proceso no puede ser mayor a 250KB."
         )
 
 
@@ -82,22 +91,22 @@ def Prompt(FULL_RUN, ININTERRUMPIDO):
                     inquirer.Text(
                         name="pid",
                         message="ID",
-                        validate=validar_proceso,
+                        validate=validar_positivo,
                     ),
                     inquirer.Text(
                         name="tiempo_arribo",
                         message="Tiempo de arribo",
-                        validate=validar_proceso,
+                        validate=validar_positivo,
                     ),
                     inquirer.Text(
                         name="tiempo_irrupcion",
                         message="Tiempo de irrupción",
-                        validate=validar_proceso,
+                        validate=validar_positivo,
                     ),
                     inquirer.Text(
                         name="tamaño",
                         message="Tamaño",
-                        validate=validar_proceso,
+                        validate=validar_tamaño,
                     ),
                 ]
                 respuesta = inquirer.prompt(

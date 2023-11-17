@@ -4,6 +4,7 @@ from rich.console import Console
 from rich.table import Table
 from rich.columns import Columns
 
+
 class Memoria:
     def __init__(self, mapa_de_memoria: list):
         self.particiones: list[Particion] = mapa_de_memoria[1:]
@@ -224,5 +225,5 @@ def mostrar_estado(
             cola_finalizados, "Procesos Finalizados", "bold green"
         )
         lista_tablas += [tabla_finalizados]
-    
+
     print((Columns(lista_tablas)))

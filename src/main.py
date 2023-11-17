@@ -9,14 +9,13 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter,
         usage="%(prog)s [options] [filepath]",
-        description=
-        '''\
+        description="""\
         Trabajo Práctico Integrador de Sistemas Operativos. Simulador de asignación de memoria y planificación de procesos.
 
         Autores: Acosta Quintana, L., Stegmayer, T., Vallejos, E., Zappa, E. Obregón, E.
 
-        De manera predeterminada, se muestra información cada vez que llega un nuevo proceso y cuando se termina un proceso en ejecución.''',
-        epilog="Github Repo: https://github.com/lau-acosta/Simulador"
+        De manera predeterminada, se muestra información cada vez que llega un nuevo proceso y cuando se termina un proceso en ejecución.""",
+        epilog="Github Repo: https://github.com/lau-acosta/Simulador",
     )
     parser.add_argument(
         "-f",
